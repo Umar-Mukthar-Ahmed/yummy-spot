@@ -26,11 +26,11 @@
                                         │
                                         ▼
                        [ Explores Category Showcase Page ]
-                       (/menu/biryani-mandi)
+                       (/menu#category-biryani-mandi)
                                         │
                                         ▼
                          [ Opens Product Detail Page (PDP) ]
-                         (/menu/biryani-mandi/mutton-mandi-platter)
+                         (/menu#product-mutton-mandi-platter)
                                         │
          ┌──────────────────────────────┴──────────────────────────────┐
          │                                                             │
@@ -100,7 +100,7 @@
 ("Diwali Artisan Sweet Boxes — Pre-Orders Now Live! Limited Batches")
                              │
                              ▼
-     [ Clicks Banner → Lands on /menu/festival-specials ]
+     [ Clicks Banner → Lands on /menu#category-festival-specials ]
                              │
                              ▼
            [ Reviews Curated Festival Hampers & Boxes ]
@@ -117,7 +117,7 @@
 ## 4. Returning Customer Accelerated Flow
 
 ```
-[ Customer opens bookmark: /menu/biryani-mandi ]
+[ Customer opens bookmark: /menu#category-biryani-mandi ]
                           │
                           ▼
         [ Locates Favorite Dish Instantly ]

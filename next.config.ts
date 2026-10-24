@@ -30,6 +30,22 @@ const nextConfig: NextConfig = {
     imageSizes:  [16, 32, 48, 64, 96, 128, 256, 384],
   },
 
+  /** Consolidate any indexed category/product URLs onto the single Menu page. */
+  async redirects() {
+    return [
+      { source: "/menu/:category/:product", destination: "/menu#product-:product", permanent: true },
+      { source: "/menu/homemade-meals", destination: "/menu#category-homemade-meals", permanent: true },
+      { source: "/menu/desserts-sweets", destination: "/menu#category-desserts-sweets", permanent: true },
+      { source: "/menu/snacks-savouries", destination: "/menu#category-snacks-savouries", permanent: true },
+      { source: "/menu/biryani-mandi", destination: "/menu#category-biryani-mandi", permanent: true },
+      { source: "/menu/curries", destination: "/menu#category-curries", permanent: true },
+      { source: "/menu/wellness-foods", destination: "/menu#category-wellness-foods", permanent: true },
+      { source: "/menu/health-supplements", destination: "/menu#category-health-supplements", permanent: true },
+      { source: "/menu/seasonal-specials", destination: "/menu#category-seasonal-specials", permanent: true },
+      { source: "/menu/festival-specials", destination: "/menu#category-festival-specials", permanent: true },
+    ]
+  },
+
   /* ── Headers ────────────────────────────────────────── */
   async headers() {
     return [

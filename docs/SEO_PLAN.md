@@ -15,11 +15,11 @@
 | Keyword Cluster | Search Intent | Target Route | Profile |
 | :--- | :--- | :--- | :--- |
 | `homemade food delivery near me` | Commercial / Local | `/`, `/menu` | High volume, high local intent |
-| `premium homemade desserts` | Commercial / Product | `/menu/desserts-sweets` | High conversion, gift intent |
-| `traditional wellness food delivery` | Informational / Commercial | `/menu/wellness-foods` | High affinity, low price-sensitivity |
-| `authentic slow cooked dum biryani` | Commercial / Product | `/menu/biryani-mandi` | High volume on weekends |
-| `homemade postpartum food delivery` | High Intent / Niche | `/menu/wellness-foods` | Extremely loyal, recurring |
-| `pure cow ghee sweets online` | Commercial / Quality | `/menu/desserts-sweets` | High trust requirement |
+| `premium homemade desserts` | Commercial / Product | `/menu#category-desserts-sweets` | High conversion, gift intent; indexed as part of `/menu` |
+| `traditional wellness food delivery` | Informational / Commercial | `/menu#category-wellness-foods` | High affinity, low price-sensitivity; indexed as part of `/menu` |
+| `authentic slow cooked dum biryani` | Commercial / Product | `/menu#category-biryani-mandi` | High volume on weekends; indexed as part of `/menu` |
+| `homemade postpartum food delivery` | High Intent / Niche | `/menu#category-wellness-foods` | Extremely loyal, recurring; indexed as part of `/menu` |
+| `pure cow ghee sweets online` | Commercial / Quality | `/menu#category-desserts-sweets` | High trust requirement; indexed as part of `/menu` |
 
 ### 1.2 Category-Specific Secondary Keywords
 
@@ -53,8 +53,7 @@ Target high-intent buyers without competing against food delivery giants:
 | :--- | :--- | :--- |
 | `/` | `Yummy Spot — Homemade. Premium. Delivered.` | Order handcrafted meals, artisanal desserts, slow-cooked mandi, and traditional wellness foods made in small batches with pure ingredients. |
 | `/menu` | `Our Handcrafted Menu \| Yummy Spot` | Explore all 10 culinary categories: homestyle meals, pure ghee desserts, slow-dum biryani, and natural wellness supplements prepared fresh to order. |
-| `/menu/[category]` | `[Category Name] \| Yummy Spot` | `[Category Description]. Prepared fresh to order with natural ingredients and zero preservatives. Order via WhatsApp.` |
-| `/menu/[cat]/[prod]` | `[Product Name] — [Category] \| Yummy Spot` | `Order fresh [Product Name]. [Short Description]. Made with [Key Ingredients]. Lead time: [X] hours.` |
+| `/menu` | `Our Menu \| Yummy Spot` | Keep category names, published product information, and ordering details together on the canonical Menu page. |
 | `/about` | `Our Culinary Story & Kitchen Hygiene \| Yummy Spot` | Discover the passion behind Yummy Spot — small-batch kitchen using generational recipes, A2 ghee, and strict hygiene standards. |
 | `/contact` | `Contact & Delivery Zones \| Yummy Spot` | Order directly via WhatsApp or verify delivery coverage. Kitchen hours: Mon-Sun 9 AM - 9 PM. |
 
@@ -98,7 +97,7 @@ Target high-intent buyers without competing against food delivery giants:
 }
 ```
 
-### 3.2 Category Page: BreadcrumbList + ItemList
+### 3.2 Menu: BreadcrumbList + ItemList
 
 ```json
 {
@@ -108,23 +107,21 @@ Target high-intent buyers without competing against food delivery giants:
       "@type": "BreadcrumbList",
       "itemListElement": [
         { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://yummyspot.com" },
-        { "@type": "ListItem", "position": 2, "name": "Menu", "item": "https://yummyspot.com/menu" },
-        { "@type": "ListItem", "position": 3, "name": "Biryani & Mandi", "item": "https://yummyspot.com/menu/biryani-mandi" }
+        { "@type": "ListItem", "position": 2, "name": "Menu", "item": "https://yummyspot.com/menu" }
       ]
     },
     {
       "@type": "ItemList",
-      "name": "Biryani & Mandi Specialties",
-      "description": "Authentic homemade dum biryanis and slow-cooked Mandi feast platters.",
+      "name": "Yummy Spot Menu",
       "itemListElement": [
-        { "@type": "ListItem", "position": 1, "url": "https://yummyspot.com/menu/biryani-mandi/mutton-mandi-platter" }
+        { "@type": "ListItem", "position": 1, "url": "https://yummyspot.com/menu#product-mutton-mandi-platter" }
       ]
     }
   ]
 }
 ```
 
-### 3.3 Product Detail: Product + Offer + BreadcrumbList
+### 3.3 Inline Product: Product + Offer
 
 ```json
 {
@@ -146,7 +143,7 @@ Target high-intent buyers without competing against food delivery giants:
 }
 ```
 
-### 3.4 Dynamic OG Image Generator (`app/menu/[category]/[product]/opengraph-image.tsx`)
+### 3.4 Menu Social Preview
 
 ```tsx
 import { ImageResponse } from "next/og"
@@ -155,10 +152,8 @@ export const runtime = "edge"
 export const size = { width: 1200, height: 630 }
 export const contentType = "image/png"
 
-export default async function Image({ params }: { params: Promise<{ product: string }> }) {
-  const { product: slug } = await params
-  const product = await getProductBySlug(slug)
-  const title = product?.name ?? "Artisanal Homemade Food"
+export default async function Image() {
+  const title = "Yummy Spot Menu"
 
   return new ImageResponse(
     <div style={{ width: "100%", height: "100%", backgroundColor: "#064e3b", color: "#fef3c7", padding: 60 }}>

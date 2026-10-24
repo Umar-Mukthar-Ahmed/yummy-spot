@@ -6,12 +6,11 @@ import { siteConfig } from "@/config/site"
  *
  * Auto-generates /sitemap.xml for search engine crawlers.
  *
- * Static routes are listed below. Dynamic routes (category pages,
- * product pages) will be fetched from the CMS and appended here
- * in Phase 6 (CMS Integration).
+ * Categories and products are sections on /menu, not separate URLs.
+ * The CMS can later populate the single menu route and its structured data.
  *
  * @see https://nextjs.org/docs/app/api-reference/file-conventions/metadata/sitemap
- * @phase Phase 6 — add dynamic product/category URLs from CMS
+ * @phase Phase 6 — populate the /menu catalog from the CMS; keep one catalog URL
  */
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = siteConfig.url
@@ -30,61 +29,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: now,
       changeFrequency: "weekly",
       priority: 0.9,
-    },
-    /* ── Category Pages (static slugs) ───────────────────────── */
-    {
-      url: `${base}/menu/homemade-meals`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.85,
-    },
-    {
-      url: `${base}/menu/desserts-sweets`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.85,
-    },
-    {
-      url: `${base}/menu/snacks-savouries`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.85,
-    },
-    {
-      url: `${base}/menu/biryani-mandi`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.85,
-    },
-    {
-      url: `${base}/menu/curries`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.85,
-    },
-    {
-      url: `${base}/menu/wellness-foods`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${base}/menu/health-supplements`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${base}/menu/seasonal-specials`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-    {
-      url: `${base}/menu/festival-specials`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.8,
     },
     /* ── Secondary Pages ──────────────────────────────────────── */
     {

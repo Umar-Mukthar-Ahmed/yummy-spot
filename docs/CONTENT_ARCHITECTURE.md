@@ -36,11 +36,11 @@ The website follows an intuitive, shallow discovery funnel designed to minimize 
 |     (/menu)     |                |  (/about, etc)  |                | (/privacy, etc) |
 +--------+--------+                +--------+--------+                +--------+--------+
          |                                  |                                  |
-         |---> Category Landing             |---> /about (Kitchen Story)       |---> /privacy
-         |     (/menu/[category])           |---> /gallery (Kitchen Visuals)   |---> /terms
+         |---> Category sections            |---> /about (Kitchen Story)       |---> /privacy
+         |     (#category-{slug})           |---> /gallery (Kitchen Visuals)   |---> /terms
          |                                  |---> /contact (WhatsApp/Direct)   |---> /sitemap.xml
-         +---> Product Detail Page          |---> /custom-order (Catering)     |---> /robots.txt
-               (/menu/[category]/[product]) |---> /seasonal (Campaign Page)    +-----------------
+         +---> Inline product details       |---> /custom-order (Catering)     |---> /robots.txt
+                                              |---> Seasonal section on /menu     +-----------------
 ```
 
 ### 2.1 Route & Hierarchy Specifications
@@ -48,9 +48,7 @@ The website follows an intuitive, shallow discovery funnel designed to minimize 
 | Hierarchy Level | Route Pattern | Page Type | Primary Objective | Key Secondary Actions |
 | :--- | :--- | :--- | :--- | :--- |
 | **L0: Root** | `/` | Marketing Homepage | Brand storytelling, featured categories, seasonal specials, instant WhatsApp order CTA | Client-side search, testimonial reviews, kitchen hygiene credentials |
-| **L1: Catalog Hub** | `/menu` | Catalog Explorer | High-level overview of all 10 culinary categories with live badge counts and search/filter interface | Filter by dietary restrictions, view featured items |
-| **L2: Category Hub** | `/menu/[category-slug]` | Category Showcase | Targeted collection browsing (e.g., `biryani-mandi`), category description, lead time disclaimers | Subcategory filtering, sorting by price/popularity |
-| **L3: Product Detail** | `/menu/[category-slug]/[product-slug]` | Product Detail Page (PDP) | Deep product info: high-res visuals, batch lead times, ingredients, allergens, serving size, direct WhatsApp order trigger | Share product link, view related products, custom batch requests |
+| **L1: Catalog** | `/menu` | Single Menu experience | All configured categories, global product search and dietary filters, product details, and seasonal items | Scroll to a category, expand details, order via WhatsApp |
 | **L1: Brand Story** | `/about` | Editorial Story | The culinary founder journey, hygiene standards, traditional ingredients, source farms | WhatsApp inquiry, read testimonials |
 | **L1: Visual Gallery** | `/gallery` | Media Wall | High-resolution kitchen prep, packaging, customer events, behind-the-scenes video snippets | Click-through to relevant product PDP |
 | **L1: Custom Concierge**| `/custom-order` | Guided Inquiry | Multi-step form for wedding boxes, party trays, corporate gifts, festival hampers | Direct compilation into formatted WhatsApp briefing |
@@ -169,24 +167,24 @@ To allow the kitchen to expand without database migrations, categories support r
 ```
 [ Root: /menu ]
    |
-   +-- [ Category: Desserts & Sweets ] (`/menu/desserts-sweets`)
+   +-- [ Category: Desserts & Sweets ] (`/menu#category-desserts-sweets`)
    |      |
-   |      +-- [ Subcategory: Ghee Sweets ] (`/menu/desserts-sweets?sub=ghee-sweets`)
-   |      +-- [ Subcategory: Baked Treats ] (`/menu/desserts-sweets?sub=baked-treats`)
-   |      +-- [ Subcategory: Sugar-Free ] (`/menu/desserts-sweets?sub=sugar-free`)
+   |      +-- [ Subcategory: Ghee Sweets ] (within `#category-desserts-sweets`)
+   |      +-- [ Subcategory: Baked Treats ] (within `#category-desserts-sweets`)
+   |      +-- [ Subcategory: Sugar-Free ] (within `#category-desserts-sweets`)
    |
-   +-- [ Category: Traditional Wellness Foods ] (`/menu/wellness-foods`)
+   +-- [ Category: Traditional Wellness Foods ] (`/menu#category-wellness-foods`)
    |      |
-   |      +-- [ Subcategory: Postnatal Care ] (`/menu/wellness-foods?sub=postnatal-care`)
-   |      +-- [ Subcategory: Immunity Broths ] (`/menu/wellness-foods?sub=immunity-broths`)
+   |      +-- [ Subcategory: Postnatal Care ] (within `#category-wellness-foods`)
+   |      +-- [ Subcategory: Immunity Broths ] (within `#category-wellness-foods`)
    |
-   +-- [ Category: Biryani & Mandi ] (`/menu/biryani-mandi`)
+   +-- [ Category: Biryani & Mandi ] (`/menu#category-biryani-mandi`)
           |
-          +-- [ Subcategory: Dum Biryanis ] (`/menu/biryani-mandi?sub=dum-biryanis`)
-          +-- [ Subcategory: Arabian Mandi ] (`/menu/biryani-mandi?sub=arabian-mandi`)
+          +-- [ Subcategory: Dum Biryanis ] (within `#category-biryani-mandi`)
+          +-- [ Subcategory: Arabian Mandi ] (within `#category-biryani-mandi`)
 ```
 
-> **Architectural Rule**: Subcategories are indexed as query parameters (`?sub=`) on the Category page to maintain flat, clean URLs (`/menu/[category-slug]/[product-slug]`) for products, preventing duplicate pathing while enabling filter states.
+> **Architectural Rule**: Product discovery stays on `/menu`; search and dietary filters apply across category sections. Category anchors are navigation aids, not separate SEO routes.
 
 ---
 
@@ -200,8 +198,6 @@ Breadcrumbs reinforce customer wayfinding and inject automated `BreadcrumbList` 
 | :--- | :--- | :--- | :--- |
 | **Homepage** | `/` | *None displayed (Root)* | `[{"@type": "ListItem", "position": 1, "name": "Home", "item": "/"}]` |
 | **Menu Hub** | `/menu` | `Home > Menu` | `Home (pos 1) > Menu (pos 2)` |
-| **Category Page** | `/menu/[category-slug]` | `Home > Menu > [Category Name]` | `Home (1) > Menu (2) > [Category] (3)` |
-| **Product Page** | `/menu/[category-slug]/[product-slug]` | `Home > Menu > [Category Name] > [Product Name]` | `Home (1) > Menu (2) > [Category] (3) > [Product] (4)` |
 | **Custom Order** | `/custom-order` | `Home > Custom Order` | `Home (1) > Custom Order (2)` |
 | **Brand Story** | `/about` | `Home > About Our Kitchen` | `Home (1) > About Our Kitchen (2)` |
 | **Gallery** | `/gallery` | `Home > Food Gallery` | `Home (1) > Food Gallery (2)` |
@@ -392,7 +388,7 @@ To guarantee that non-technical business owners can operate the storefront witho
 | :--- | :--- | :--- | :--- | :--- |
 | **Global** | `global_announcement` | Banner Text | Rich Text (short) | Max 80 characters. Highlight holidays, kitchen closures, or discounts. |
 | **Global** | `global_announcement` | Is Visible | Boolean | Toggle on/off instantaneously across all pages. |
-| **Global** | `global_announcement` | Link URL | Text (URL/Slug) | Optional link target (e.g. `/menu/seasonal-specials`). |
+| **Global** | `global_announcement` | Link URL | Text (URL/Slug) | Optional link target (e.g. `/menu#category-seasonal-specials`). |
 | **Global** | `global_contact` | WhatsApp Primary Number | String (E.164) | International format without `+` (e.g. `919876543210`). |
 | **Global** | `global_contact` | Operating Hours | String | Displayed in headers, drawer, and contact pages. |
 | **Global** | `global_contact` | Kitchen Address / Zone | String | City, neighborhoods served, and postal codes. |

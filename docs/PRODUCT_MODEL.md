@@ -515,7 +515,7 @@ Please confirm kitchen availability, delivery slot, and payment UPI/link. Thank 
   "seo": {
     "metaTitle": "Signature Mutton Mandi Platter | Homemade Feast | Yummy Spot",
     "metaDescription": "Authentic homemade mutton mandi platter slow-cooked with aged basmati rice, pure ghee, and aromatic Arabic spices. Order fresh via WhatsApp.",
-    "canonicalUrl": "https://yummyspot.com/menu/biryani-mandi/mutton-mandi-platter"
+    "canonicalUrl": "https://yummyspot.com/menu#product-mutton-mandi-platter"
   },
   "createdAt": "2026-02-01T10:00:00.000Z",
   "updatedAt": "2026-10-24T05:30:00.000Z",

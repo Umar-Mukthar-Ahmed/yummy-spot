@@ -88,7 +88,7 @@ export function createWebSiteSchema(): JsonLdWebSite {
  * createBreadcrumbSchema([
  *   { name: "Home",      href: "/" },
  *   { name: "Menu",      href: "/menu" },
- *   { name: "Desserts",  href: "/menu/desserts-sweets" },
+ *   { name: "Desserts",  href: "/menu#category-desserts-sweets" },
  * ])
  */
 export function createBreadcrumbSchema(

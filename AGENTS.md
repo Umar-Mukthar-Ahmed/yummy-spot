@@ -129,16 +129,11 @@ const url = buildWhatsAppUrl(
 app/
 ├── page.tsx                     → / (Homepage)
 ├── menu/
-│   ├── page.tsx                 → /menu (All categories)
-│   └── [category]/
-│       ├── page.tsx             → /menu/[category]
-│       └── [product]/
-│           └── page.tsx         → /menu/[category]/[product]
+│   └── page.tsx                 → /menu (Categories, products, search, filters)
 ├── about/page.tsx               → /about
 ├── gallery/page.tsx             → /gallery
 ├── contact/page.tsx             → /contact
 ├── custom-order/page.tsx        → /custom-order
-├── seasonal/page.tsx            → /seasonal
 ├── privacy/page.tsx             → /privacy
 ├── terms/page.tsx               → /terms
 └── api/

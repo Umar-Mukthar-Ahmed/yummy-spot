@@ -138,7 +138,7 @@ export default function HomePage() {
                 {/* Phase 6: replace promo copy and availability with the active CMS banner. */}
                 <p className="mt-3 max-w-prose font-sans text-sm text-primary-foreground/80">Our seasonal collection will be announced here.</p>
               </div>
-              <Link href="/seasonal" className="inline-flex min-h-12 shrink-0 items-center justify-center rounded-full border border-primary-foreground/50 px-6 font-sans text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-foreground">Discover seasonal</Link>
+              <Link href="/menu#category-seasonal-specials" className="inline-flex min-h-12 shrink-0 items-center justify-center rounded-full border border-primary-foreground/50 px-6 font-sans text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-foreground">Discover seasonal</Link>
             </div>
           </div>
         </Container>

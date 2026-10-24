@@ -4,8 +4,8 @@
  * Centralised definition of all navigation structures.
  * Changing URLs or labels happens only here — no link rot.
  *
- * Category slugs are authoritative: they define the URL pattern
- * for /menu/[category] routes and must match CMS content slugs.
+ * Category slugs are authoritative: they define in-page Menu section ids
+ * and must match CMS content slugs.
  */
 
 /* ── Types ──────────────────────────────────────────────────── */
@@ -40,16 +40,16 @@ export const primaryNav: NavItem[] = [
  * Add new categories here without touching any page files.
  */
 export const categoryNav: NavItem[] = [
-  { label: "Homemade Meals",            href: "/menu/homemade-meals",       segment: "homemade-meals" },
-  { label: "Desserts & Sweets",         href: "/menu/desserts-sweets",      segment: "desserts-sweets" },
-  { label: "Snacks & Savouries",        href: "/menu/snacks-savouries",     segment: "snacks-savouries" },
-  { label: "Biryani & Mandi",           href: "/menu/biryani-mandi",        segment: "biryani-mandi" },
-  { label: "Curries",                   href: "/menu/curries",              segment: "curries" },
-  { label: "Traditional Wellness Foods",href: "/menu/wellness-foods",       segment: "wellness-foods" },
-  { label: "Homemade Health Supplements",href:"/menu/health-supplements",   segment: "health-supplements" },
-  { label: "Seasonal Specials",         href: "/menu/seasonal-specials",    segment: "seasonal-specials" },
-  { label: "Festival Specials",         href: "/menu/festival-specials",    segment: "festival-specials" },
-  { label: "Custom Orders",             href: "/custom-order",              segment: "custom-order" },
+  { label: "Homemade Meals",             href: "/menu#category-homemade-meals",        segment: "homemade-meals" },
+  { label: "Desserts & Sweets",          href: "/menu#category-desserts-sweets",       segment: "desserts-sweets" },
+  { label: "Snacks & Savouries",         href: "/menu#category-snacks-savouries",      segment: "snacks-savouries" },
+  { label: "Biryani & Mandi",            href: "/menu#category-biryani-mandi",         segment: "biryani-mandi" },
+  { label: "Curries",                    href: "/menu#category-curries",               segment: "curries" },
+  { label: "Traditional Wellness Foods", href: "/menu#category-wellness-foods",        segment: "wellness-foods" },
+  { label: "Homemade Health Supplements",href: "/menu#category-health-supplements",    segment: "health-supplements" },
+  { label: "Seasonal Specials",          href: "/menu#category-seasonal-specials",     segment: "seasonal-specials" },
+  { label: "Festival Specials",          href: "/menu#category-festival-specials",     segment: "festival-specials" },
+  { label: "Custom Orders",              href: "/menu#category-custom-order",           segment: "custom-order" },
 ]
 
 /* ── Footer Navigation ──────────────────────────────────────── */
@@ -67,11 +67,11 @@ export const footerNav: NavGroup[] = [
   {
     label: "Categories",
     items: [
-      { label: "Homemade Meals",  href: "/menu/homemade-meals" },
-      { label: "Desserts",        href: "/menu/desserts-sweets" },
-      { label: "Biryani & Mandi", href: "/menu/biryani-mandi" },
-      { label: "Wellness Foods",  href: "/menu/wellness-foods" },
-      { label: "Seasonal",        href: "/menu/seasonal-specials" },
+      { label: "Homemade Meals",  href: "/menu#category-homemade-meals" },
+      { label: "Desserts",        href: "/menu#category-desserts-sweets" },
+      { label: "Biryani & Mandi", href: "/menu#category-biryani-mandi" },
+      { label: "Wellness Foods",  href: "/menu#category-wellness-foods" },
+      { label: "Seasonal",        href: "/menu#category-seasonal-specials" },
     ],
   },
   {

@@ -82,7 +82,7 @@ Fields:
 ├── isVisible: Boolean (Default: false)
 ├── text: String (Max 90 chars, plain text)
 ├── linkText: String (Optional, e.g. "Order Now")
-├── linkUrl: String (Optional, e.g. "/menu/seasonal-specials")
+├── linkUrl: String (Optional, e.g. "/menu#category-seasonal-specials")
 ├── variant: Select ["emerald" (info), "amber" (warning), "rose" (urgent)]
 └── scheduleExpiry: DateTime (Optional - auto-hides after date)
 ```
@@ -188,7 +188,7 @@ Step-by-step procedures designed for the kitchen owner using a mobile device or 
 [ Tap 'Publish' ]
          │
          ▼
-* Instant Webhook fires -> Next.js clears cache for /menu & /menu/desserts-sweets *
+* Instant Webhook fires -> Next.js clears the cached /menu catalog *
 Live on site within 1.5 seconds!
 ```
 
@@ -232,7 +232,7 @@ The data flow utilizes Next.js App Router on-demand Incremental Static Regenerat
 | 1. Authenticate secret token                                                |
 | 2. Call revalidateTag('products')                                           |
 | 3. Call revalidateTag('category:biryani-mandi')                             |
-| 4. Call revalidatePath('/menu/biryani-mandi/mutton-mandi-platter')          |
+| 4. Call revalidatePath('/menu')                                             |
 +--------------------------------------+--------------------------------------+
                                        |
                                        | Cache Invalidation Signal
