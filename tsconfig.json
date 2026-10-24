@@ -1,23 +1,37 @@
 {
   "compilerOptions": {
+    /* ── Target & Syntax ──────────────────────────────── */
     "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": true,
-    "esModuleInterop": true,
+    "jsx": "react-jsx",
     "module": "esnext",
     "moduleResolution": "bundler",
+
+    /* ── Interop & Emission ───────────────────────────── */
+    "allowJs": true,
+    "esModuleInterop": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "react-jsx",
+    "noEmit": true,
     "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
+
+    /* ── Type Safety — Strict Mode ────────────────────── */
+    "strict": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+
+    /* ── Library Interop ──────────────────────────────── */
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+
+    /* ── Next.js Plugin ──────────────────────────────── */
+    "plugins": [{ "name": "next" }],
+
+    /* ── Absolute Import Alias ───────────────────────── */
     "paths": {
       "@/*": ["./*"]
     }
@@ -26,9 +40,9 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
+    "**/*.mts",
     ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts",
-    "**/*.mts"
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

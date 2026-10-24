@@ -16,7 +16,6 @@
 import type {
   JsonLdOrganization,
   JsonLdLocalBusiness,
-  JsonLdProduct,
   JsonLdBreadcrumb,
   JsonLdWebSite,
   JsonLdSchema,

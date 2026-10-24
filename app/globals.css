@@ -80,6 +80,29 @@
   --spacing-section-lg: 7.5rem;   /* 120px — large section padding */
   --spacing-container:  1.5rem;   /* 24px  — horizontal gutter */
 
+  /* ── Fluid Responsive Spacing ──────────────────────────── */
+  /* clamp(min@320px, fluid, max@1920px) */
+  --spacing-section-fluid:    clamp(3rem,    1.5rem + 7.5vw, 7.5rem);
+  --spacing-section-sm-fluid: clamp(2rem,    1rem + 5vw, 5rem);
+  --spacing-gap-fluid:        clamp(1rem,    0.5rem + 2.5vw, 2rem);
+
+  /* ── Fluid Typography Scale ─────────────────────────────── */
+  /* clamp(size@320px, midpoint, size@1920px)                 */
+  /* Overrides Tailwind's default fixed text-* sizes          */
+  --text-xs:      clamp(0.6875rem, 0.625rem + 0.25vw,  0.75rem);    /* 11→12px  */
+  --text-sm:      clamp(0.8125rem, 0.75rem + 0.25vw,   0.875rem);   /* 13→14px  */
+  --text-base:    clamp(0.9375rem, 0.875rem + 0.3vw,   1rem);       /* 15→16px  */
+  --text-lg:      clamp(1rem,      0.9375rem + 0.35vw, 1.125rem);   /* 16→18px  */
+  --text-xl:      clamp(1.125rem,  1rem + 0.5vw,       1.25rem);    /* 18→20px  */
+  --text-2xl:     clamp(1.25rem,   1.125rem + 0.625vw, 1.5rem);     /* 20→24px  */
+  --text-3xl:     clamp(1.5rem,    1.25rem + 1vw,      1.875rem);   /* 24→30px  */
+  --text-4xl:     clamp(1.875rem,  1.5rem + 1.5vw,     2.25rem);    /* 30→36px  */
+  --text-5xl:     clamp(2.25rem,   1.75rem + 2vw,      3rem);       /* 36→48px  */
+  --text-6xl:     clamp(3rem,      2.25rem + 3vw,      3.75rem);    /* 48→60px  */
+  --text-7xl:     clamp(3.75rem,   2.75rem + 4vw,      4.5rem);     /* 60→72px  */
+  --text-8xl:     clamp(4.5rem,    3rem + 6vw,         6rem);       /* 72→96px  */
+  --text-9xl:     clamp(4rem,      2.5rem + 7.5vw,     7rem);       /* 64→112px */
+
   /* ── Easing Curves ─────────────────────────────────────── */
   --ease-smooth:    cubic-bezier(0.4, 0, 0.2, 1);
   --ease-spring:    cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -176,6 +199,8 @@ html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   font-feature-settings: "rlig" 1, "calt" 1;
+  /* Prevent horizontal scroll at every viewport (mobile-first rule) */
+  overflow-x: hidden;
 }
 
 body {
@@ -186,14 +211,32 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100dvh;
+  overflow-x: hidden;
+  /* Prevent content from exceeding the viewport on narrow screens */
+  max-width: 100%;
 }
 
-/* ── Semantic heading typography ────────────────────────── */
+/* ── Semantic heading typography (fluid via clamp tokens) ── */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-fraunces), Georgia, "Times New Roman", serif;
   line-height: 1.2;
   letter-spacing: -0.02em;
   color: var(--foreground);
+  /* Prevent headings from overflowing on narrow viewports */
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* ── Touch improvements ──────────────────────────────────── */
+a, button, [role="button"] {
+  /* Ensure minimum touch target guidance via padding, not just size */
+  touch-action: manipulation;
+}
+
+/* ── Responsive container defaults ──────────────────────── */
+.container {
+  width: 100%;
+  padding-inline: var(--spacing-container);
 }
 
 /* ── Accessible focus styles ────────────────────────────── */

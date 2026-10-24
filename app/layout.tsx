@@ -2,14 +2,13 @@ import type { Metadata, Viewport } from "next"
 import { Fraunces, Manrope } from "next/font/google"
 
 import { Providers } from "@/providers"
+import { Navbar } from "@/components/layout/navbar"
+import { Footer } from "@/components/layout/footer"
 import { siteConfig } from "@/config/site"
 import "./globals.css"
 
 /* ────────────────────────────────────────────────────────────
    FONTS
-   Both are variable fonts — no explicit weight array needed.
-   CSS variable names are applied to <html> and referenced
-   in globals.css via @theme inline { --font-serif: var(--font-fraunces) }
 ──────────────────────────────────────────────────────────── */
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -25,8 +24,6 @@ const manrope = Manrope({
 
 /* ────────────────────────────────────────────────────────────
    ROOT METADATA
-   Page-level metadata is composed via lib/metadata.ts.
-   This sets the site-wide defaults and title template.
 ──────────────────────────────────────────────────────────── */
 export const metadata: Metadata = {
   title: {
@@ -34,7 +31,7 @@ export const metadata: Metadata = {
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
-  keywords: siteConfig.keywords,
+  keywords: [...siteConfig.keywords],
   metadataBase: new URL(siteConfig.url),
   authors: [{ name: siteConfig.name, url: siteConfig.url }],
   creator: siteConfig.name,
@@ -77,13 +74,11 @@ export const metadata: Metadata = {
 
 /* ────────────────────────────────────────────────────────────
    VIEWPORT
-   Exported separately per Next.js 15+ requirement.
-   themeColor updates the browser chrome on mobile.
 ──────────────────────────────────────────────────────────── */
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "hsl(36 22% 97%)" },
-    { media: "(prefers-color-scheme: dark)",  color: "hsl(25 14% 7%)"  },
+    { media: "(prefers-color-scheme: dark)", color: "hsl(25 14% 7%)" },
   ],
   width: "device-width",
   initialScale: 1,
@@ -105,7 +100,27 @@ export default function RootLayout({
       className={`${fraunces.variable} ${manrope.variable}`}
     >
       <body className="bg-background text-foreground antialiased">
-        <Providers>{children}</Providers>
+        <Providers>
+          {/* Skip-to-content link for keyboard & screen-reader users */}
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:font-sans focus:text-sm focus:font-medium focus:text-primary-foreground focus:shadow-lg"
+          >
+            Skip to main content
+          </a>
+
+          <Navbar />
+
+          <main
+            id="main-content"
+            tabIndex={-1}
+            className="min-h-[calc(100dvh-4rem)] outline-none"
+          >
+            {children}
+          </main>
+
+          <Footer />
+        </Providers>
       </body>
     </html>
   )
