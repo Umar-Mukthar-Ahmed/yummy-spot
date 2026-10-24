@@ -53,6 +53,7 @@
   --color-warning: var(--warning);
   --color-ring:    var(--ring);
   --color-overlay: var(--overlay);
+  --color-whatsapp: var(--whatsapp);
 
   /* ── Border Radius ─────────────────────────────────────── */
   --radius-none: 0px;
@@ -146,6 +147,7 @@
   --destructive-foreground: hsl(0 0% 100%);
 
   --success:           hsl(142 72% 29%);
+  --whatsapp:          hsl(142 70% 45%);
   --warning:           hsl(38 92% 50%);
   --ring:              hsl(22 65% 38% / 0.35);
   --overlay:           hsl(25 18% 11% / 0.5);
@@ -179,6 +181,7 @@
   --destructive-foreground: hsl(0 0% 100%);
 
   --success:           hsl(142 60% 45%);
+  --whatsapp:          hsl(142 70% 45%);
   --warning:           hsl(38 80% 60%);
   --ring:              hsl(22 62% 58% / 0.35);
   --overlay:           hsl(25 14% 7% / 0.8);

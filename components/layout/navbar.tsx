@@ -4,10 +4,7 @@
  * Sticky site header with logo, desktop navigation, and theme toggle.
  * Uses frosted-glass backdrop-blur for a premium feel.
  *
- * Mobile navigation drawer will be implemented in Phase 3 as a
- * separate Client Component (MobileNav) that imports into this file.
- *
- * @phase Phase 3 — add MobileNav drawer, active link highlighting
+ * @phase Phase 2 — responsive navigation drawer
  */
 
 import Link from "next/link"
@@ -15,6 +12,7 @@ import { Container } from "./container"
 import { Logo } from "@/components/shared/logo"
 import { ThemeToggle } from "@/components/shared/theme-toggle"
 import { primaryNav } from "@/config/navigation"
+import { MobileNav } from "./mobile-nav"
 
 export function Navbar() {
   return (
@@ -62,7 +60,7 @@ export function Navbar() {
           {/* ── Actions ─────────────────────────────────────── */}
           <div className="flex items-center gap-1">
             <ThemeToggle />
-            {/* MobileNav — Phase 3 */}
+            <MobileNav />
           </div>
         </nav>
       </Container>

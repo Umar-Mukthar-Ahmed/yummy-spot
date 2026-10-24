@@ -109,6 +109,8 @@ export default function RootLayout({
             Skip to main content
           </a>
 
+          {/* Phase 3: enable when a configured announcement is ready. */}
+          {/* <AnnouncementBanner message="" /> */}
           <Navbar />
 
           <main
