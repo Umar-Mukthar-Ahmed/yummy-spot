@@ -1,26 +1,236 @@
+/* ═══════════════════════════════════════════════════════════════
+   YUMMY SPOT — GLOBAL DESIGN SYSTEM
+   Tailwind CSS v4 · CSS-first configuration
+
+   Architecture:
+   1.  @import "tailwindcss"  — loads all Tailwind utilities
+   2.  @import animations     — keyframes & animation utilities
+   3.  @theme inline {}       — maps CSS variables → Tailwind tokens
+                               (inline = emits var() instead of static)
+   4.  :root {}               — light theme raw CSS variable values
+   5.  .dark {}               — dark theme raw CSS variable values
+   6.  Base styles            — HTML resets, typography, scrollbar, etc.
+═══════════════════════════════════════════════════════════════ */
+
 @import "tailwindcss";
+@import "../styles/animations.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
+/* ═══════════════════════════════════════════════════════════════
+   TAILWIND THEME — Design Token Mapping
+   Variables defined inside @theme inline {} become Tailwind
+   utility classes AND are emitted as var() references, enabling
+   runtime theme switching without CSS recompilation.
+═══════════════════════════════════════════════════════════════ */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  /* ── Fonts ─────────────────────────────────────────────── */
+  --font-serif:  var(--font-fraunces);
+  --font-sans:   var(--font-manrope);
+
+  /* ── Semantic Color Tokens ─────────────────────────────── */
+  /* Each --color-* generates bg-*, text-*, border-* utilities */
+  --color-background:       var(--background);
+  --color-foreground:       var(--foreground);
+  --color-surface:          var(--surface);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-border:           var(--border);
+  --color-border-subtle:    var(--border-subtle);
+
+  --color-primary:            var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover:      var(--primary-hover);
+
+  --color-muted:            var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent:            var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-destructive:            var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-ring:    var(--ring);
+  --color-overlay: var(--overlay);
+
+  /* ── Border Radius ─────────────────────────────────────── */
+  --radius-none: 0px;
+  --radius-xs:   0.25rem;   /* 4px  */
+  --radius-sm:   0.375rem;  /* 6px  */
+  --radius-md:   0.5rem;    /* 8px  */
+  --radius-lg:   0.75rem;   /* 12px */
+  --radius-xl:   1rem;      /* 16px */
+  --radius-2xl:  1.25rem;   /* 20px */
+  --radius-3xl:  1.5rem;    /* 24px */
+  --radius-full: 9999px;
+
+  /* ── Shadows (warm-tinted) ─────────────────────────────── */
+  --shadow-xs:    0 1px 2px 0 hsl(25 15% 12% / 0.05);
+  --shadow-sm:    0 1px 3px 0 hsl(25 15% 12% / 0.08), 0 1px 2px -1px hsl(25 15% 12% / 0.06);
+  --shadow-md:    0 4px 6px -1px hsl(25 15% 12% / 0.08), 0 2px 4px -2px hsl(25 15% 12% / 0.05);
+  --shadow-lg:    0 10px 15px -3px hsl(25 15% 12% / 0.08), 0 4px 6px -4px hsl(25 15% 12% / 0.05);
+  --shadow-xl:    0 20px 25px -5px hsl(25 15% 12% / 0.1), 0 8px 10px -6px hsl(25 15% 12% / 0.05);
+  --shadow-2xl:   0 25px 50px -12px hsl(25 15% 12% / 0.15);
+  --shadow-inner: inset 0 2px 4px 0 hsl(25 15% 12% / 0.05);
+  --shadow-glow:  0 0 0 3px hsl(22 65% 38% / 0.2);
+
+  /* ── Layout Spacing ────────────────────────────────────── */
+  --spacing-section:    5rem;     /* 80px  — standard section padding */
+  --spacing-section-lg: 7.5rem;   /* 120px — large section padding */
+  --spacing-container:  1.5rem;   /* 24px  — horizontal gutter */
+
+  /* ── Easing Curves ─────────────────────────────────────── */
+  --ease-smooth:    cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring:    cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out-expo:  cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out:    cubic-bezier(0.45, 0, 0.55, 1);
+
+  /* ── Duration Scale ────────────────────────────────────── */
+  --duration-instant: 50ms;
+  --duration-fast:    150ms;
+  --duration-normal:  250ms;
+  --duration-slow:    400ms;
+  --duration-slower:  600ms;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ═══════════════════════════════════════════════════════════════
+   LIGHT THEME
+   Warm off-white background with amber-brown primary.
+   Inspired by premium artisan food brands.
+═══════════════════════════════════════════════════════════════ */
+:root {
+  color-scheme: light;
+
+  --background:        hsl(36 22% 97%);    /* warm off-white */
+  --foreground:        hsl(25 18% 11%);    /* near-black warm */
+  --surface:           hsl(36 18% 93%);    /* subtle warm tint */
+  --surface-elevated:  hsl(0 0% 100%);     /* pure white for cards */
+  --border:            hsl(30 15% 85%);    /* warm mid-gray */
+  --border-subtle:     hsl(30 12% 91%);    /* near-invisible border */
+
+  --primary:           hsl(22 65% 38%);    /* warm amber-brown */
+  --primary-foreground: hsl(36 22% 97%);
+  --primary-hover:     hsl(22 65% 31%);
+
+  --muted:             hsl(30 14% 90%);
+  --muted-foreground:  hsl(25 12% 47%);
+
+  --accent:            hsl(43 80% 57%);    /* warm gold */
+  --accent-foreground: hsl(25 18% 11%);
+
+  --destructive:       hsl(0 72% 51%);
+  --destructive-foreground: hsl(0 0% 100%);
+
+  --success:           hsl(142 72% 29%);
+  --warning:           hsl(38 92% 50%);
+  --ring:              hsl(22 65% 38% / 0.35);
+  --overlay:           hsl(25 18% 11% / 0.5);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DARK THEME
+   Deep warm charcoal with softened amber primary.
+═══════════════════════════════════════════════════════════════ */
+.dark {
+  color-scheme: dark;
+
+  --background:        hsl(25 14% 7%);     /* deep warm charcoal */
+  --foreground:        hsl(36 16% 92%);    /* warm cream */
+  --surface:           hsl(25 12% 11%);    /* subtle dark card */
+  --surface-elevated:  hsl(25 11% 14%);    /* slightly lighter */
+  --border:            hsl(25 10% 20%);
+  --border-subtle:     hsl(25 8% 15%);
+
+  --primary:           hsl(22 62% 58%);    /* softer amber in dark */
+  --primary-foreground: hsl(25 14% 7%);
+  --primary-hover:     hsl(22 62% 65%);
+
+  --muted:             hsl(25 10% 18%);
+  --muted-foreground:  hsl(30 10% 54%);
+
+  --accent:            hsl(43 72% 52%);
+  --accent-foreground: hsl(25 14% 7%);
+
+  --destructive:       hsl(0 62% 58%);
+  --destructive-foreground: hsl(0 0% 100%);
+
+  --success:           hsl(142 60% 45%);
+  --warning:           hsl(38 80% 60%);
+  --ring:              hsl(22 62% 58% / 0.35);
+  --overlay:           hsl(25 14% 7% / 0.8);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BASE STYLES
+═══════════════════════════════════════════════════════════════ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  border-color: var(--border);
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  font-feature-settings: "rlig" 1, "calt" 1;
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-manrope), system-ui, -apple-system, sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100dvh;
+}
+
+/* ── Semantic heading typography ────────────────────────── */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-fraunces), Georgia, "Times New Roman", serif;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--foreground);
+}
+
+/* ── Accessible focus styles ────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs);
+}
+
+/* ── Text selection ─────────────────────────────────────── */
+::selection {
+  background-color: hsl(22 65% 38% / 0.18);
+  color: var(--foreground);
+}
+
+/* ── Scrollbar (webkit) ─────────────────────────────────── */
+::-webkit-scrollbar       { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--surface); }
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--muted-foreground); }
+
+/* ── Images ─────────────────────────────────────────────── */
+img, video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ── Reduced motion ─────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

@@ -1,0 +1,57 @@
+/**
+ * Site Configuration
+ *
+ * The single source of truth for site-wide metadata, brand identity,
+ * social links, and contact information.
+ *
+ * All values referencing environment variables gracefully fall back
+ * to safe defaults for local development.
+ *
+ * Update production values via environment variables — do NOT
+ * hardcode production URLs or phone numbers here.
+ */
+
+export const siteConfig = {
+  /** Brand */
+  name: "Yummy Spot",
+  tagline: "Homemade. Premium. Delivered.",
+  description:
+    "Premium homemade meals, desserts, snacks, and traditional wellness products — crafted with care and delivered to your door.",
+
+  /** URLs */
+  url: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
+
+  /** SEO keywords */
+  keywords: [
+    "homemade food",
+    "premium desserts",
+    "traditional wellness products",
+    "homemade meals",
+    "local delivery",
+    "artisan food",
+    "home kitchen",
+  ],
+
+  /**
+   * WhatsApp ordering
+   * number: International format without the leading '+' (e.g. "919876543210")
+   */
+  whatsapp: {
+    number: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "",
+    defaultMessage: "Hi! I'd like to place an order from Yummy Spot.",
+  },
+
+  /** Social presence — populate when accounts are created */
+  social: {
+    instagram: process.env.NEXT_PUBLIC_INSTAGRAM_URL ?? "",
+    facebook: process.env.NEXT_PUBLIC_FACEBOOK_URL ?? "",
+  },
+
+  /** OpenGraph image dimensions — keep in sync with /public/og/ assets */
+  og: {
+    width: 1200,
+    height: 630,
+  },
+} as const
+
+export type SiteConfig = typeof siteConfig
