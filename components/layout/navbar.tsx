@@ -13,6 +13,7 @@ import { Logo } from "@/components/shared/logo"
 import { ThemeToggle } from "@/components/shared/theme-toggle"
 import { primaryNav } from "@/config/navigation"
 import { MobileNav } from "./mobile-nav"
+import { HomeHeaderActions } from "@/components/home/home-header-actions"
 
 export function Navbar() {
   return (
@@ -59,6 +60,7 @@ export function Navbar() {
 
           {/* ── Actions ─────────────────────────────────────── */}
           <div className="flex items-center gap-1">
+            <HomeHeaderActions />
             <ThemeToggle />
             <MobileNav />
           </div>

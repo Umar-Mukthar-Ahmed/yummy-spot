@@ -1,9 +1,9 @@
 "use client"
 
 import Image from "next/image"
-import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { categoryNav } from "@/config/navigation"
+import { categoryPhotography, foodPhotography } from "@/config/food-photography"
 import type { Product } from "@/types/product"
 import { buildOrderMessage, buildWhatsAppUrl, formatPrice } from "@/lib/utils"
 import { matchesFuzzyQuery } from "@/lib/search"
@@ -26,9 +26,8 @@ export function ProductBrowser({ products }: ProductBrowserProps) {
   const [debouncedQuery, setDebouncedQuery] = useState("")
   const [selectedDietary, setSelectedDietary] = useState<string[]>([])
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
-  const [filtersOpen, setFiltersOpen] = useState(false)
-  const filterTriggerRef = useRef<HTMLButtonElement>(null)
-  const filterDialogRef = useRef<HTMLElement>(null)
+  const [highlightedProduct, setHighlightedProduct] = useState<string | null>(null)
+  const pendingProduct = useRef<string | null>(null)
 
   useEffect(() => {
     const timeout = window.setTimeout(() => setDebouncedQuery(query.trim().toLocaleLowerCase()), 150)
@@ -36,37 +35,20 @@ export function ProductBrowser({ products }: ProductBrowserProps) {
   }, [query])
 
   useEffect(() => {
-    function readCategoryHash() {
-      const slug = window.location.hash.replace(/^#category-/, "")
+    function readCategoryQuery() {
+      const params = new URLSearchParams(window.location.search)
+      const slug = params.get("category") ?? window.location.hash.replace(/^#category-/, "")
       setSelectedCategory(categoryNav.some((item) => item.segment === slug) ? slug : null)
+      pendingProduct.current = params.get("product") ?? (window.location.hash.replace(/^#product-/, "") || null)
     }
-    readCategoryHash()
-    window.addEventListener("hashchange", readCategoryHash)
-    return () => window.removeEventListener("hashchange", readCategoryHash)
-  }, [])
-
-  useEffect(() => {
-    if (!filtersOpen) return
-    const previousOverflow = document.body.style.overflow
-    const trigger = filterTriggerRef.current
-    document.body.style.overflow = "hidden"
-    filterDialogRef.current?.querySelector<HTMLButtonElement>("button[aria-label='Close filters']")?.focus()
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") setFiltersOpen(false)
-      if (event.key !== "Tab" || !filterDialogRef.current) return
-      const focusable = Array.from(filterDialogRef.current.querySelectorAll<HTMLElement>("button, input, [tabindex]:not([tabindex='-1'])"))
-      const first = focusable[0]
-      const last = focusable[focusable.length - 1]
-      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus() }
-      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus() }
-    }
-    document.addEventListener("keydown", handleKeyDown)
+    readCategoryQuery()
+    window.addEventListener("popstate", readCategoryQuery)
+    window.addEventListener("hashchange", readCategoryQuery)
     return () => {
-      document.body.style.overflow = previousOverflow
-      document.removeEventListener("keydown", handleKeyDown)
-      if (trigger?.isConnected) trigger.focus()
+      window.removeEventListener("popstate", readCategoryQuery)
+      window.removeEventListener("hashchange", readCategoryQuery)
     }
-  }, [filtersOpen])
+  }, [])
 
   const visibleProducts = useMemo(() => products.filter((product) => {
     const text = `${product.name} ${product.shortDescription} ${product.tags.map((tag) => tag.name).join(" ")}`.toLocaleLowerCase()
@@ -76,60 +58,67 @@ export function ProductBrowser({ products }: ProductBrowserProps) {
     return matchesQuery && matchesDiet && matchesCategory
   }), [products, debouncedQuery, selectedDietary, selectedCategory])
 
+  useEffect(() => {
+    const slug = pendingProduct.current
+    if (!slug || visibleProducts.length === 0) return
+    const product = visibleProducts.find((item) => item.slug === slug)
+    if (!product) return
+    pendingProduct.current = null
+    setHighlightedProduct(product.slug)
+    window.requestAnimationFrame(() => document.getElementById(`product-${product.slug}`)?.scrollIntoView({ behavior: "smooth", block: "center" }))
+    const timeout = window.setTimeout(() => setHighlightedProduct(null), 2400)
+    return () => window.clearTimeout(timeout)
+  }, [visibleProducts])
+
   function selectCategory(slug: string | null) {
     setSelectedCategory(slug)
-    window.history.replaceState(null, "", slug ? `/menu#category-${slug}` : "/menu")
+    const url = new URL(window.location.href)
+    if (slug) url.searchParams.set("category", slug)
+    else url.searchParams.delete("category")
+    url.searchParams.delete("product")
+    window.history.replaceState(null, "", `${url.pathname}${url.search}`)
   }
 
   function toggleDietary(slug: string) {
     setSelectedDietary((current) => current.includes(slug) ? current.filter((item) => item !== slug) : [...current, slug])
   }
 
-  const filters = (
-    <fieldset>
-      <legend className="mb-3 font-sans text-sm font-semibold text-foreground">Dietary preferences</legend>
-      <div className="flex flex-wrap gap-2">
-        {dietaryFilters.map((filter) => {
-          const active = selectedDietary.includes(filter.slug)
-          return <button key={filter.slug} type="button" aria-pressed={active} onClick={() => toggleDietary(filter.slug)} className={`min-h-11 rounded-full border px-4 font-sans text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${active ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background text-foreground hover:bg-surface"}`}>{filter.label}</button>
-        })}
-      </div>
-    </fieldset>
-  )
-
   return (
     <div>
-      <nav aria-label="Menu categories" className="-mx-4 mb-5 overflow-x-auto px-4 pb-2 sm:mx-0 sm:overflow-visible sm:px-0">
+      <div className="sticky top-16 z-20 -mx-4 mb-5 space-y-3 border-y border-border/70 bg-background/95 px-4 py-3 backdrop-blur sm:top-20 sm:mx-0 sm:rounded-2xl sm:border sm:px-4">
+      <label className="relative block min-w-0">
+        <span className="sr-only">Search menu products</span>
+        <svg aria-hidden="true" viewBox="0 0 24 24" className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="11" cy="11" r="7" /><path d="m16 16 4 4" /></svg>
+        <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search dishes and treats…" autoComplete="off" className="min-h-12 w-full rounded-xl border border-border bg-surface pl-12 pr-4 font-sans text-base text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+      </label>
+      <nav aria-label="Menu categories" className="-mx-1 overflow-x-auto px-1 pb-1">
         <ul className="flex w-max gap-2 sm:w-auto sm:flex-wrap" role="list">
           <li><button type="button" id="category-all" aria-pressed={selectedCategory === null} onClick={() => selectCategory(null)} className={`min-h-11 rounded-full border px-4 font-sans text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${selectedCategory === null ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background text-foreground hover:bg-surface"}`}>All</button></li>
           {categoryNav.map((category) => <li key={category.segment}><button type="button" id={`category-${category.segment}`} aria-pressed={selectedCategory === category.segment} onClick={() => selectCategory(category.segment ?? null)} className={`min-h-11 whitespace-nowrap rounded-full border px-4 font-sans text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${selectedCategory === category.segment ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background text-foreground hover:bg-surface"}`}>{category.label}</button></li>)}
         </ul>
       </nav>
-
-      <div className="mb-8 flex flex-col gap-3 sm:flex-row">
-        <label className="relative min-w-0 flex-1">
-          <span className="sr-only">Search menu products</span>
-          <svg aria-hidden="true" viewBox="0 0 24 24" className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="11" cy="11" r="7" /><path d="m16 16 4 4" /></svg>
-          <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search dishes and treats…" autoComplete="off" className="min-h-12 w-full rounded-xl border border-border bg-background pl-12 pr-4 font-sans text-base text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring" />
-        </label>
-        <button ref={filterTriggerRef} type="button" onClick={() => setFiltersOpen(true)} aria-haspopup="dialog" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-border bg-background px-5 font-sans text-sm font-semibold text-foreground hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-          <span aria-hidden="true">☷</span> Dietary filters{selectedDietary.length > 0 && <span className="grid h-5 min-w-5 place-items-center rounded-full bg-primary px-1 text-xs text-primary-foreground">{selectedDietary.length}</span>}
-        </button>
+      <fieldset className="flex min-w-0 items-center gap-2 overflow-x-auto pb-1"><legend className="sr-only">Dietary filters</legend><span aria-hidden="true" className="shrink-0 font-sans text-xs font-semibold text-muted-foreground">Dietary</span>{dietaryFilters.map((filter) => { const active = selectedDietary.includes(filter.slug); return <button key={filter.slug} type="button" aria-pressed={active} onClick={() => toggleDietary(filter.slug)} className={`min-h-11 shrink-0 rounded-full border px-3 font-sans text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${active ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background text-foreground hover:bg-surface"}`}>{filter.label}</button> })}</fieldset>
       </div>
+      <p className="mb-5 mt-6 font-sans text-sm text-muted-foreground" aria-live="polite">{products.length ? `${visibleProducts.length} dishes` : "Browse the menu"}{selectedCategory ? ` · ${categoryNav.find((item) => item.segment === selectedCategory)?.label ?? "Category"}` : ""}</p>
 
       {visibleProducts.length > 0 ? (
         <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" role="list">
           {visibleProducts.map((product) => {
             const image = product.images.find((item) => item.isPrimary) ?? product.images[0]
+            const fallback = categoryPhotography[categoryNav.findIndex((category) => category.segment === product.categorySlug)] ?? foodPhotography.biryani
             const orderUrl = buildWhatsAppUrl(siteConfig.whatsapp.number, product.whatsappMessageTemplate || buildOrderMessage(product.name))
-            return <li id={`product-${product.slug}`} key={product.id} className="scroll-mt-24 overflow-hidden rounded-xl border border-border bg-surface-elevated shadow-sm">
+            return <li id={`product-${product.slug}`} key={product.id} className={`scroll-mt-28 overflow-hidden rounded-xl border bg-surface-elevated shadow-sm transition duration-300 ${highlightedProduct === product.slug ? "border-primary ring-2 ring-primary/40 shadow-lg" : "border-border"}`}>
               <div className="relative aspect-[4/3] overflow-hidden bg-surface">
-                {image ? <Image src={image.url} alt={image.alt} fill sizes="(min-width: 1280px) 22vw, (min-width: 1024px) 30vw, (min-width: 640px) 45vw, 100vw" className="object-cover" /> : <ImagePlaceholder />}
+                <Image src={image?.url ?? fallback.src} alt={image?.alt ?? fallback.alt} fill sizes="(min-width: 1280px) 22vw, (min-width: 1024px) 30vw, (min-width: 640px) 45vw, 100vw" className="object-cover" />
               </div>
               <div className="p-4">
                 <h2 className="font-serif text-xl text-foreground">{product.name}</h2>
+                <p className="mt-1 font-sans text-xs font-semibold uppercase tracking-wide text-primary">{categoryNav.find((category) => category.segment === product.categorySlug)?.label ?? "Menu item"}</p>
                 <p className="mt-2 line-clamp-2 min-h-10 font-sans text-sm text-muted-foreground">{product.shortDescription}</p>
-                <p className="mt-3 font-sans text-sm font-semibold text-foreground">{formatPrice(product.salePrice ?? product.price, product.currency)} <span className="font-normal text-muted-foreground">/ {product.priceUnit}</span></p>
+                <div className="mt-3 flex flex-wrap gap-1.5">{product.tags.map((tag) => <span key={tag.id} className="rounded-full border border-border px-2.5 py-1 font-sans text-xs text-muted-foreground">{tag.name}</span>)}</div>
+                <p className="mt-3 font-sans text-sm font-semibold text-foreground">{product.price > 0 ? <>{formatPrice(product.salePrice ?? product.price, product.currency)} <span className="font-normal text-muted-foreground">/ {product.priceUnit}</span></> : "Ask for today's price"}</p>
+                <p className={`mt-2 font-sans text-xs ${product.inStock ? "text-success" : "text-muted-foreground"}`}>{product.availabilityNote ?? (product.inStock ? "Available to order" : "Check availability on WhatsApp")}</p>
+                <details className="mt-3 border-t border-border pt-3"><summary className="min-h-11 cursor-pointer py-2 font-sans text-sm font-semibold text-foreground">Dish details</summary><p className="text-sm text-muted-foreground">{product.description}</p>{product.ingredients.length > 0 && <p className="mt-2 text-xs text-muted-foreground">Ingredients: {product.ingredients.join(", ")}</p>}</details>
                 <a href={orderUrl} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-whatsapp px-4 font-sans text-sm font-semibold text-white hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Order via WhatsApp</a>
               </div>
             </li>
@@ -143,7 +132,7 @@ export function ProductBrowser({ products }: ProductBrowserProps) {
           {/* Phase 6: replace these neutral card placeholders with approved CMS catalog entries. */}
           <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" role="list" aria-label="Menu item placeholders">
             {placeholderCards.map((card) => <li key={card} aria-hidden="true" className="overflow-hidden rounded-xl border border-border bg-surface-elevated shadow-sm">
-              <ImagePlaceholder />
+              <div className="relative aspect-[4/3] overflow-hidden bg-surface"><Image src={featuredFallback(card).src} alt={featuredFallback(card).alt} fill sizes="(min-width: 1280px) 22vw, (min-width: 1024px) 30vw, (min-width: 640px) 45vw, 100vw" className="object-cover" /></div>
               <div className="space-y-3 p-4">
                 <div className="h-5 w-3/4 animate-pulse rounded bg-muted" />
                 <div className="h-3 w-full animate-pulse rounded bg-muted" />
@@ -156,23 +145,11 @@ export function ProductBrowser({ products }: ProductBrowserProps) {
         </>
       )}
 
-      <AnimatePresence>
-        {filtersOpen && <motion.div className="fixed inset-0 z-50 flex items-end justify-center bg-overlay p-0 sm:items-center sm:p-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setFiltersOpen(false)}>
-          <motion.section ref={filterDialogRef} role="dialog" aria-modal="true" aria-labelledby="filter-title" className="max-h-[85svh] w-full overflow-y-auto rounded-t-3xl border border-border bg-background p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-2xl sm:max-w-xl sm:rounded-3xl sm:pb-6" initial={{ y: "12%", opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: "12%", opacity: 0 }} transition={{ type: "spring", damping: 30, stiffness: 320 }} onClick={(event) => event.stopPropagation()}>
-            <div className="mb-5 flex items-center justify-between"><h2 id="filter-title" className="font-serif text-xl text-foreground">Dietary filters</h2><button type="button" onClick={() => setFiltersOpen(false)} aria-label="Close filters" className="grid h-11 w-11 place-items-center rounded-full border border-border text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">×</button></div>
-            {filters}
-            <button type="button" onClick={() => setFiltersOpen(false)} className="mt-5 min-h-12 w-full rounded-full bg-primary px-5 font-sans text-sm font-semibold text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Show {visibleProducts.length} items</button>
-          </motion.section>
-        </motion.div>}
-      </AnimatePresence>
     </div>
   )
 }
 
 /** Neutral, accessible image treatment for catalog items without approved photography. */
-function ImagePlaceholder() {
-  return <div role="img" aria-label="Product photo placeholder" className="relative grid aspect-[4/3] place-items-center overflow-hidden bg-surface">
-    <div aria-hidden="true" className="absolute h-40 w-40 rounded-full border border-border/70 bg-background/40 shadow-inner sm:h-48 sm:w-48" />
-    <svg aria-hidden="true" viewBox="0 0 48 48" className="relative h-10 w-10 text-muted-foreground/70" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="24" cy="24" r="17" /><circle cx="24" cy="24" r="11" /><path d="M15 19c4 2 14 2 18 0M17 29c4-2 10-2 14 0" /></svg>
-  </div>
+function featuredFallback(index: number) {
+  return categoryPhotography[index % categoryPhotography.length] ?? foodPhotography.biryani
 }
