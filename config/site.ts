@@ -14,9 +14,9 @@
 export const siteConfig = {
   /** Brand */
   name: "Yummy Spot",
-  tagline: "Homemade. Premium. Delivered.",
+  tagline: "Homemade with care.",
   description:
-    "Premium homemade meals, desserts, snacks, and traditional wellness products — crafted with care and delivered to your door.",
+    "Homemade meals, desserts, snacks and traditional wellness foods from our home kitchen. Browse the menu and send an order request online.",
 
   /** URLs */
   url: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
@@ -27,7 +27,6 @@ export const siteConfig = {
     "premium desserts",
     "traditional wellness products",
     "homemade meals",
-    "local delivery",
     "artisan food",
     "home kitchen",
   ],

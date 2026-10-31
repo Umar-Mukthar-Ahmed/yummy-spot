@@ -149,7 +149,7 @@
   --success:           hsl(142 72% 29%);
   --whatsapp:          hsl(142 72% 29%);   /* white text needs >= 4.5:1 */
   --warning:           hsl(38 92% 50%);
-  --ring:              hsl(22 65% 38% / 0.35);
+  --ring:              hsl(22 65% 38%);    /* opaque: focus indicators need >= 3:1 */
   --overlay:           hsl(25 18% 11% / 0.5);
 }
 
@@ -183,7 +183,7 @@
   --success:           hsl(142 60% 45%);
   --whatsapp:          hsl(142 72% 29%);   /* white text needs >= 4.5:1 */
   --warning:           hsl(38 80% 60%);
-  --ring:              hsl(22 62% 58% / 0.35);
+  --ring:              hsl(22 62% 58%);
   --overlay:           hsl(25 14% 7% / 0.8);
 }
 
@@ -279,6 +279,7 @@ img, video {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;

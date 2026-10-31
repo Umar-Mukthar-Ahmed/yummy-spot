@@ -75,6 +75,7 @@ const footerGroups: NavGroup[] = [
     label: "Explore",
     items: [
       { label: "Our Menu",      href: "/menu" },
+      { label: "Your Order Request", href: "/order" },
       { label: "About Us",      href: "/about" },
       { label: "Gallery",       href: "/gallery" },
       { label: "Contact",       href: "/contact" },

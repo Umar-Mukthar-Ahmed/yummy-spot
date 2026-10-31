@@ -1,119 +1,25 @@
-import { forwardRef } from "react"
 import { cn } from "@/lib/utils"
 
-/**
- * Button — Server Component compatible
- *
- * Primary interactive primitive. Supports multiple visual variants
- * and sizes. Uses forwardRef for composability with third-party libs.
- *
- * @example
- * <Button>Order via WhatsApp</Button>
- * <Button variant="outline" size="sm">View Menu</Button>
- * <Button variant="ghost" size="icon" aria-label="Close"><X /></Button>
- * <Button isLoading>Sending...</Button>
- */
+/** One source of truth for button and link-button looks, so every CTA shares sizing, focus and press feedback. */
+export type ButtonVariant = "primary" | "secondary" | "ghost" | "destructive"
+export type ButtonSize = "sm" | "md" | "lg"
 
-type ButtonVariant =
-  | "primary"
-  | "secondary"
-  | "outline"
-  | "ghost"
-  | "destructive"
+const base =
+  "inline-flex select-none items-center justify-center gap-2 rounded-full font-sans font-semibold transition-[background-color,border-color,color,box-shadow,transform] duration-150 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-60 aria-disabled:pointer-events-none aria-disabled:opacity-60"
 
-type ButtonSize = "sm" | "md" | "lg" | "icon"
-
-type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: ButtonVariant
-  size?: ButtonSize
-  /** Shows a spinner and disables interaction */
-  isLoading?: boolean
+const variants: Record<ButtonVariant, string> = {
+  primary: "bg-primary text-primary-foreground shadow-sm hover:bg-primary-hover",
+  secondary: "border border-border bg-background text-foreground hover:bg-surface",
+  ghost: "text-foreground hover:bg-surface",
+  destructive: "border border-destructive/50 bg-background text-destructive hover:bg-destructive/10",
 }
 
-const variantStyles: Record<ButtonVariant, string> = {
-  primary:
-    "bg-primary text-primary-foreground hover:bg-primary-hover shadow-sm",
-  secondary:
-    "bg-surface text-foreground border border-border hover:bg-muted",
-  outline:
-    "border border-primary text-primary hover:bg-primary hover:text-primary-foreground",
-  ghost:
-    "text-foreground hover:bg-surface hover:text-foreground",
-  destructive:
-    "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+const sizes: Record<ButtonSize, string> = {
+  sm: "min-h-11 px-4 text-sm",
+  md: "min-h-11 px-5 text-sm",
+  lg: "min-h-12 px-6 text-sm",
 }
 
-const sizeStyles: Record<ButtonSize, string> = {
-  sm:   "h-8 px-3 text-sm gap-1.5 rounded-md",
-  md:   "h-10 px-4 text-sm gap-2 rounded-lg",
-  lg:   "h-12 px-6 text-base gap-2 rounded-lg",
-  icon: "h-9 w-9 rounded-lg",
+export function buttonClass({ variant = "primary", size = "md", className }: { variant?: ButtonVariant; size?: ButtonSize; className?: string } = {}) {
+  return cn(base, variants[variant], sizes[size], className)
 }
-
-export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  (
-    {
-      className,
-      variant = "primary",
-      size = "md",
-      isLoading = false,
-      disabled,
-      children,
-      ...props
-    },
-    ref
-  ) => {
-    return (
-      <button
-        ref={ref}
-        disabled={disabled ?? isLoading}
-        aria-busy={isLoading}
-        className={cn(
-          /* Base */
-          "inline-flex items-center justify-center font-sans font-medium",
-          "transition-all duration-150",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-          "focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-          "disabled:pointer-events-none disabled:opacity-50",
-          "select-none cursor-pointer",
-          /* Variant */
-          variantStyles[variant],
-          /* Size */
-          sizeStyles[size],
-          className
-        )}
-        {...props}
-      >
-        {isLoading ? (
-          <>
-            <svg
-              className="h-4 w-4 animate-spin"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-              />
-            </svg>
-            <span className="sr-only">Loading…</span>
-          </>
-        ) : (
-          children
-        )}
-      </button>
-    )
-  }
-)
-Button.displayName = "Button"

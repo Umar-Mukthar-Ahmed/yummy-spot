@@ -13,6 +13,7 @@ import { Container } from "./container"
 import { Logo } from "@/components/shared/logo"
 import { siteConfig } from "@/config/site"
 import { footerNav } from "@/config/navigation"
+import { buildWhatsAppUrl } from "@/lib/utils"
 
 export function Footer() {
   const year = new Date().getFullYear()
@@ -32,6 +33,16 @@ export function Footer() {
             <p className="mt-4 max-w-xs font-sans text-sm text-muted-foreground leading-relaxed">
               {siteConfig.tagline}
             </p>
+            {siteConfig.whatsapp.number && (
+              <a
+                href={buildWhatsAppUrl(siteConfig.whatsapp.number, siteConfig.whatsapp.defaultMessage)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 inline-flex min-h-11 items-center font-sans text-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                Questions? Message us on WhatsApp
+              </a>
+            )}
           </div>
 
           {/* Nav group columns */}
@@ -40,12 +51,12 @@ export function Footer() {
               <h2 className="mb-3 font-sans text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
                 {group.label}
               </h2>
-              <ul className="space-y-2.5" role="list">
+              <ul className="space-y-0.5" role="list">
                 {group.items.map((item) => (
                   <li key={item.href}>
                     <Link
                       href={item.href}
-                      className="font-sans text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground"
+                      className="inline-flex min-h-11 items-center font-sans text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                       {...(item.external && {
                         target: "_blank",
                         rel: "noopener noreferrer",
