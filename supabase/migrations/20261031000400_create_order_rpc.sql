@@ -57,7 +57,8 @@ begin
   select * into v_existing from orders where idempotency_key = v_key;
   if found then
     return jsonb_build_object('ok', true, 'duplicate', true, 'reference', v_existing.reference,
-                              'subtotal', v_existing.subtotal, 'currency', v_existing.currency);
+                              'subtotal', v_existing.subtotal, 'currency', v_existing.currency,
+                              'needsPriceQuote', v_existing.needs_price_quote);
   end if;
 
   -- Serialise concurrent submissions from the same phone so the rate-limit counts stay accurate.
@@ -127,7 +128,8 @@ begin
   limit 1;
   if found then
     return jsonb_build_object('ok', true, 'duplicate', true, 'reference', v_existing.reference,
-                              'subtotal', v_existing.subtotal, 'currency', v_existing.currency);
+                              'subtotal', v_existing.subtotal, 'currency', v_existing.currency,
+                              'needsPriceQuote', v_existing.needs_price_quote);
   end if;
 
   select coalesce(sum(round(coalesce(p.sale_price, p.price) * x.quantity, 2)), 0),
@@ -153,7 +155,8 @@ begin
       select * into v_existing from orders where idempotency_key = v_key;
       if found then
         return jsonb_build_object('ok', true, 'duplicate', true, 'reference', v_existing.reference,
-                                  'subtotal', v_existing.subtotal, 'currency', v_existing.currency);
+                                  'subtotal', v_existing.subtotal, 'currency', v_existing.currency,
+                                  'needsPriceQuote', v_existing.needs_price_quote);
       end if;
       v_attempts := v_attempts + 1;
       if v_attempts >= 5 then

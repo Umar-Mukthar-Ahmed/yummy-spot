@@ -1,6 +1,8 @@
 import { z } from "zod"
 
 export const MAX_ORDER_ITEMS = 20
+/** How far ahead an order can be requested. Keep in sync with c_max_days_ahead in create_order(). */
+export const MAX_DAYS_AHEAD = 60
 
 /** Returns an E.164 number ("+" and 8-15 digits) or null. Numbers typed without "+" use the configured country code. */
 export function normalizePhone(raw: string, defaultCountryCode: string): string | null {

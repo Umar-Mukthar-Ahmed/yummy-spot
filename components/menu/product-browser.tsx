@@ -1,14 +1,13 @@
 "use client"
 
-import Image from "next/image"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { categoryNav } from "@/config/navigation"
-import { categoryPhotography, foodPhotography } from "@/config/food-photography"
 import { formatPrice } from "@/lib/utils"
 import { matchesFuzzyQuery } from "@/lib/search"
 import { useCatalog } from "@/hooks/use-catalog"
 import { MediaImage } from "@/components/shared/media-image"
 import { AddToRequest } from "@/components/order/add-to-request"
+import { WhatsAppButton } from "@/components/ui/whatsapp-button"
 
 const dietaryFilters = [
   { slug: "halal", label: "Halal" },
@@ -112,10 +111,9 @@ export function ProductBrowser() {
         <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" role="list">
           {visibleProducts.map((product) => {
             const image = product.images.find((item) => item.isPrimary) ?? product.images[0]
-            const fallback = categoryPhotography[configCategories.findIndex((category) => category.slug === product.categorySlug)] ?? foodPhotography.biryani
             return <li id={`product-${product.slug}`} key={product.id} className={`scroll-mt-28 overflow-hidden rounded-xl border bg-surface-elevated shadow-sm transition duration-300 ${highlightedProduct === product.slug ? "border-primary ring-2 ring-primary/40 shadow-lg" : "border-border"}`}>
               <div className="relative aspect-[4/3] overflow-hidden bg-surface">
-                <MediaImage image={image} fallback={fallback} alt={product.name} sizes="(min-width: 1280px) 22vw, (min-width: 1024px) 30vw, (min-width: 640px) 45vw, 100vw" className="object-cover" />
+                <MediaImage image={image} alt={product.name} sizes="(min-width: 1280px) 22vw, (min-width: 1024px) 30vw, (min-width: 640px) 45vw, 100vw" className="object-cover" />
               </div>
               <div className="p-4">
                 <h2 className="font-serif text-xl text-foreground">{product.name}</h2>
@@ -134,12 +132,17 @@ export function ProductBrowser() {
         <p className="rounded-xl border border-dashed border-border bg-surface/40 px-5 py-8 text-center font-sans text-sm text-muted-foreground" role="status">
           {products.length > 0 ? "No published items match these filters yet." : "No dishes are published yet. Please check back soon."}
         </p>
+      ) : state.status === "unavailable" ? (
+        <div className="rounded-xl border border-dashed border-border bg-surface/40 px-5 py-8 text-center" role="status">
+          <p className="font-sans text-sm text-muted-foreground">The menu is not available right now. Please try again in a few minutes, or message us on WhatsApp.</p>
+          <WhatsAppButton className="mt-4" />
+        </div>
       ) : (
         <>
-          <p className="sr-only" role="status">{state.status === "loading" ? "Loading the menu." : "The menu is not available right now."}</p>
+          <p className="sr-only" role="status">Loading the menu.</p>
           <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" role="list" aria-label="Menu item placeholders">
             {placeholderCards.map((card) => <li key={card} aria-hidden="true" className="overflow-hidden rounded-xl border border-border bg-surface-elevated shadow-sm">
-              <div className="relative aspect-[4/3] overflow-hidden bg-surface"><Image src={featuredFallback(card).src} alt={featuredFallback(card).alt} fill sizes="(min-width: 1280px) 22vw, (min-width: 1024px) 30vw, (min-width: 640px) 45vw, 100vw" className="object-cover" /></div>
+              <div className="aspect-[4/3] animate-pulse bg-muted" />
               <div className="space-y-3 p-4">
                 <div className="h-5 w-3/4 animate-pulse rounded bg-muted" />
                 <div className="h-3 w-full animate-pulse rounded bg-muted" />
@@ -154,9 +157,4 @@ export function ProductBrowser() {
 
     </div>
   )
-}
-
-/** Neutral, accessible image treatment for catalog items without approved photography. */
-function featuredFallback(index: number) {
-  return categoryPhotography[index % categoryPhotography.length] ?? foodPhotography.biryani
 }

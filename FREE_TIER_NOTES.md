@@ -77,3 +77,4 @@ TOTP/MFA for admin, Telegram or email alerts, scheduled keep-alive and backups, 
 | Date | Change |
 | :--- | :--- |
 | 2026-10-31 | Initial stack recorded: Cloudflare Workers Free + Turnstile, Supabase Free, Cloudinary Free. `cacheComponents` and `partialPrefetching` turned off because they hang in the Workers runtime. Catalog is fetched in the browser, so no ISR cache infrastructure is needed. |
+| 2026-10-31 | V1 quality audit: no new services. Order form now validates in the browser with the same schema as the API, so a typo no longer uses up the single-use Turnstile token. Duplicate order replies from `create_order()` now include `needsPriceQuote`. |

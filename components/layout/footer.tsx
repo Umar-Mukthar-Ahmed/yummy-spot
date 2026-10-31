@@ -15,7 +15,7 @@ import { siteConfig } from "@/config/site"
 import { footerNav } from "@/config/navigation"
 
 export function Footer() {
-  const year = 2025
+  const year = new Date().getFullYear()
 
   return (
     <footer
@@ -66,7 +66,7 @@ export function Footer() {
             &copy; {year} {siteConfig.name}. All rights reserved.
           </p>
           <p className="font-sans text-xs text-muted-foreground">
-            Homemade with care &middot; Orders via WhatsApp
+            Homemade with care &middot; Order requests online
           </p>
         </div>
       </Container>

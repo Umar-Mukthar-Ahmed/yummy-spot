@@ -17,18 +17,20 @@ const trustFeatures = [
   { icon: "leaf", title: "Freshly prepared", note: "Made with care" },
   { icon: "bowl", title: "Traditional recipes", note: "Rooted in home cooking" },
   { icon: "sparkle", title: "No preservatives", note: "Simple ingredients" },
-  { icon: "chat", title: "WhatsApp orders", note: "Direct and personal" },
+  { icon: "chat", title: "Easy ordering", note: "Send a request online" },
   { icon: "delivery", title: "Home delivery", note: "Delivered with care" },
 ] as const
 
 const kitchenValues = ["Home cooked with love", "Fresh ingredients", "Traditional recipes", "Small batch cooking", "Family recipes"] as const
 const processSteps = [
   { title: "Browse our menu", note: "Choose your favorites", icon: "menu" },
-  { title: "Message us", note: "Order on WhatsApp", icon: "chat" },
+  { title: "Send a request", note: "Choose dishes and send", icon: "chat" },
   { title: "Freshly prepared", note: "Made just for you", icon: "bowl" },
   { title: "Get it delivered", note: "At home or pickup", icon: "delivery" },
 ] as const
 const placeholderTiles = Array.from({ length: 6 }, (_, index) => index)
+/** Skeleton sections for content that is not wired up yet. They are shown while developing and hidden in production. */
+const showDevPlaceholders = process.env.NODE_ENV !== "production"
 
 /** Complete editorial homepage sections, with business content sourced from configuration or catalog data. */
 export function HomeSections() {
@@ -74,7 +76,7 @@ function HeroSection() {
         <div className="relative mx-auto min-h-64 w-full max-w-3xl lg:my-0 lg:-mr-8 lg:w-[calc(100%+2rem)] lg:max-w-none lg:scale-[1.03] lg:origin-left">
           <HeroFloat>
             <div className="relative aspect-[1.28/1] w-full overflow-hidden lg:aspect-[1.12/1] rounded-[2rem] border border-border/70 bg-surface shadow-xl sm:rounded-[2.5rem] lg:rounded-l-[8rem] lg:rounded-r-none">
-              <Image src={foodPhotography.biryani.src} alt={foodPhotography.biryani.alt} fill priority sizes="(min-width: 1024px) 58vw, 100vw" className="object-cover" />
+              <Image src={foodPhotography.biryani.src} alt={foodPhotography.biryani.alt} fill loading="eager" fetchPriority="high" sizes="(min-width: 1024px) 58vw, 100vw" className="object-cover" />
               <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-background/50 via-transparent to-transparent lg:from-background/55" />
             </div>
           </HeroFloat>
@@ -170,6 +172,7 @@ function KitchenStorySection() {
 }
 
 function TestimonialsSection() {
+  if (!showDevPlaceholders) return null
   return (
     <Section spacing="md" className="bg-surface" aria-labelledby="testimonials-heading">
       <Container>
@@ -190,9 +193,9 @@ function TestimonialsSection() {
 
 function InstagramSection() {
   return (
-    <Section spacing="md" aria-labelledby="instagram-heading">
-      <Container className="grid items-center gap-8 lg:grid-cols-[1fr_0.95fr]">
-        <div>
+    <Section spacing="md" aria-labelledby={showDevPlaceholders ? "instagram-heading" : undefined} aria-label={showDevPlaceholders ? undefined : "Seasonal selection"}>
+      <Container className={`grid items-center gap-8 ${showDevPlaceholders ? "lg:grid-cols-[1fr_0.95fr]" : ""}`}>
+        {showDevPlaceholders && <div>
           <HomeReveal>
             <p className="mb-2 font-sans text-xs font-semibold uppercase tracking-[0.18em] text-primary">Follow along</p>
             <Heading id="instagram-heading" as="h2" size="2xl">A little look inside our kitchen.</Heading>
@@ -205,7 +208,7 @@ function InstagramSection() {
               <Image src={featuredPhotography[tile % featuredPhotography.length]!.src} alt="" fill sizes="(min-width: 1024px) 12vw, 28vw" className="object-cover transition-transform duration-300 hover:scale-105" />
             </li>)}
           </ul>
-        </div>
+        </div>}
         <HomeReveal>
           <Link href="/menu?category=seasonal-specials" className="group relative block min-h-64 overflow-hidden rounded-[2rem] border border-border bg-surface shadow-md sm:min-h-72">
             <Image src={foodPhotography.dessert.src} alt="" fill sizes="(min-width: 1024px) 45vw, 100vw" className="object-cover transition-transform duration-500 group-hover:scale-105" />
@@ -249,9 +252,9 @@ function FinalOrderSection() {
         <div className="max-w-2xl">
           <p className="mb-2 font-sans text-xs font-semibold uppercase tracking-[0.18em] text-background/65">Homemade. Fresh. Delivered.</p>
           <Heading as="h2" size="2xl" className="text-background">Ready for today&apos;s meal?</Heading>
-          <Text className="mt-2 text-background/75">Message us directly to ask about the menu and place an order.</Text>
+          <Text className="mt-2 text-background/75">Browse the menu and send us a request, or message us on WhatsApp with any questions.</Text>
         </div>
-        <WhatsAppButton className="shrink-0 bg-success px-7 text-white" />
+        <WhatsAppButton className="shrink-0 px-7" />
       </Container>
     </section>
   )

@@ -23,6 +23,23 @@ export type NavGroup = {
   items: NavItem[]
 }
 
+/* ── Planned routes ─────────────────────────────────────────── */
+/**
+ * Routes that are designed but not built yet. Links to them are hidden from the header,
+ * mobile menu and footer, and they are left out of the sitemap, so visitors never hit a 404.
+ * When a page is built, delete its path here and its links appear everywhere.
+ */
+export const plannedRoutes: ReadonlySet<string> = new Set([
+  "/about",
+  "/gallery",
+  "/contact",
+  "/custom-order",
+  "/privacy",
+  "/terms",
+])
+
+const isLive = (item: NavItem) => !plannedRoutes.has(item.href)
+
 /* ── Primary Navigation ─────────────────────────────────────── */
 /** Rendered in the Navbar header. Keep this ≤ 6 items. */
 export const primaryNav: NavItem[] = [
@@ -31,7 +48,7 @@ export const primaryNav: NavItem[] = [
   { label: "About",   href: "/about",  segment: "about" },
   { label: "Gallery", href: "/gallery",segment: "gallery" },
   { label: "Contact", href: "/contact",segment: "contact" },
-]
+].filter(isLive)
 
 /* ── Product Category Navigation ───────────────────────────── */
 /**
@@ -53,7 +70,7 @@ export const categoryNav: NavItem[] = [
 ]
 
 /* ── Footer Navigation ──────────────────────────────────────── */
-export const footerNav: NavGroup[] = [
+const footerGroups: NavGroup[] = [
   {
     label: "Explore",
     items: [
@@ -82,3 +99,8 @@ export const footerNav: NavGroup[] = [
     ],
   },
 ]
+
+/** Footer groups without links to planned pages; empty groups are dropped. */
+export const footerNav: NavGroup[] = footerGroups
+  .map((group) => ({ ...group, items: group.items.filter(isLive) }))
+  .filter((group) => group.items.length > 0)

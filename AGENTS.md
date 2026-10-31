@@ -154,6 +154,12 @@ app/
 ├── about, gallery, contact, custom-order, privacy, terms   → planned, not built yet
 ```
 
+**Planned pages are hidden, not linked.** `config/navigation.ts` has a `plannedRoutes` set. Header, mobile nav, footer and `app/sitemap.ts` skip those paths. When you build one of these pages, remove it from `plannedRoutes` and it appears everywhere. Privacy and Terms must exist before launch because the order form collects phone numbers and addresses.
+
+**Production never shows made-up content.** Dishes without a photo get a neutral block (`MediaImage` has no stock fallback). If the catalog cannot load, `/menu` shows an unavailable message with the WhatsApp button. Testimonials and the Instagram column on the home page are placeholders and render only when `NODE_ENV !== "production"`.
+
+**CSS cascade.** Global element styles in `globals.css` live inside `@layer base`. Do not put them outside a layer, or they override Tailwind utilities. The body uses `overflow-x: clip` (not `hidden`) so sticky headers keep working.
+
 **Dynamic route params are Promises** in Next.js App Router — always await them.
 
 ---
@@ -211,3 +217,13 @@ On Windows, run the OpenNext binary from `node_modules\.bin` (the scripts do thi
 | 9 | Planned | PWA and mobile enhancements |
 
 Optional features not yet added by decision: admin TOTP, order alerts, backups, keep-alive. See `FREE_TIER_NOTES.md`.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { foodPhotography } from "@/config/food-photography"
 import { uploadImage } from "@/lib/media-upload"
 import { MediaImage } from "@/components/shared/media-image"
 import type { MediaAsset, MediaFolder } from "@/types/media"
@@ -65,7 +64,7 @@ export function ImageUploader({ images, onChange, folder, max, defaultAlt }: Ima
           {images.map((image, index) => (
             <li key={image.publicId || image.url} className="flex gap-3 rounded-xl border border-border bg-surface-elevated p-2">
               <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-surface">
-                <MediaImage image={image} fallback={foodPhotography.biryani} sizes="80px" className="object-cover" />
+                <MediaImage image={image} sizes="80px" className="object-cover" />
               </div>
               <div className="min-w-0 flex-1 space-y-1.5">
                 <label className="sr-only" htmlFor={`alt-${index}`}>Image description</label>

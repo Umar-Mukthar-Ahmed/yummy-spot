@@ -42,17 +42,6 @@ export function buildWhatsAppUrl(number: string, message?: string): string {
   return `${base}?text=${encodeURIComponent(message)}`
 }
 
-/**
- * Generates a pre-filled WhatsApp order message for a product.
- *
- * @param productName - Display name of the product
- * @param quantity    - Optional quantity hint
- */
-export function buildOrderMessage(productName: string, quantity?: string): string {
-  const qty = quantity ? ` (Qty: ${quantity})` : ""
-  return `Hi! I'd like to order: ${productName}${qty}. Please confirm availability and delivery details.`
-}
-
 /* ── Formatting ──────────────────────────────────────────────── */
 
 /**

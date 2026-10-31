@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils"
  * Fully accessible with ARIA labels and visible focus ring.
  */
 export function ThemeToggle({ className }: { className?: string }) {
-  const { theme, setTheme } = useTheme()
+  const { resolvedTheme, setTheme } = useTheme()
   const mounted = useMounted()
 
   /* ── SSR skeleton — prevent hydration mismatch ─── */
@@ -31,7 +31,8 @@ export function ThemeToggle({ className }: { className?: string }) {
     )
   }
 
-  const isDark = theme === "dark"
+  /* resolvedTheme is "light" or "dark" even when the stored preference is "system" */
+  const isDark = resolvedTheme === "dark"
 
   return (
     <button

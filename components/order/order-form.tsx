@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { env } from "@/lib/env"
 import { loadPublicSettings, type PublicSettings } from "@/lib/catalog"
 import { formatPrice } from "@/lib/utils"
-import { categoryPhotography } from "@/config/food-photography"
+import { issuesToErrors, MAX_DAYS_AHEAD, normalizePhone, orderRequestSchema } from "@/lib/validation/order"
 import { MediaImage } from "@/components/shared/media-image"
 import { Turnstile } from "./turnstile"
 import { quantityStep, useRequest } from "./request-provider"
@@ -41,6 +41,7 @@ export function OrderForm() {
   const siteKey = env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
   const idempotencyKey = useRef<string>("")
   const mountedAt = useRef(0)
+  const formRef = useRef<HTMLFormElement>(null)
   const [settings, setSettings] = useState<PublicSettings | null>(null)
   const [fulfilment, setFulfilment] = useState<Fulfilment>("delivery")
   const [token, setToken] = useState<string | null>(null)
@@ -66,6 +67,7 @@ export function OrderForm() {
 
   const leadHours = useMemo(() => lines.reduce((max, line) => Math.max(max, line.leadTimeHours), 0), [lines])
   const earliest = now > 0 ? toLocalInput(new Date(now + leadHours * 3_600_000 + 60_000)) : undefined
+  const latest = now > 0 ? toLocalInput(new Date(now + MAX_DAYS_AHEAD * 86_400_000)) : undefined
   const currency = lines[0]?.currency ?? "INR"
   const estimate = lines.reduce((sum, line) => sum + line.unitPrice * line.quantity, 0)
   const hasQuoteItems = lines.some((line) => line.unitPrice === 0)
@@ -84,9 +86,37 @@ export function OrderForm() {
     setFormError(null)
 
     const requestedFor = requestedRaw ? new Date(requestedRaw) : null
-    if (!requestedFor || Number.isNaN(requestedFor.getTime())) {
-      setErrors({ "fulfilment.requestedFor": "Please choose a date and time" })
+    const payload = {
+      idempotencyKey: idempotencyKey.current,
+      turnstileToken: token,
+      website: text("website"),
+      elapsedMs: Math.round(performance.now() - mountedAt.current),
+      customer: { name: text("name"), phone: text("phone"), email: text("email") },
+      fulfilment: {
+        type: fulfilment,
+        area: fulfilment === "delivery" ? text("area") : "",
+        address: fulfilment === "delivery" ? text("address") : "",
+        requestedFor: requestedFor && !Number.isNaN(requestedFor.getTime()) ? requestedFor.toISOString() : "",
+      },
+      notes: text("notes"),
+      items: lines.map((line) => ({ productId: line.productId, quantity: line.quantity })),
+    }
+
+    // Same schema the API uses, so mistakes are caught here without spending the single-use Turnstile token.
+    const parsed = orderRequestSchema.safeParse(payload)
+    const found: FieldErrors = parsed.success ? {} : issuesToErrors(parsed.error)
+    if (!normalizePhone(payload.customer.phone, env.NEXT_PUBLIC_DEFAULT_COUNTRY_CODE)) {
+      found["customer.phone"] = payload.customer.phone ? "Please enter a valid phone number" : "Please enter your phone number"
+    }
+    if (requestedFor && !Number.isNaN(requestedFor.getTime())) {
+      const time = requestedFor.getTime()
+      if (time < Date.now() + leadHours * 3_600_000) found["fulfilment.requestedFor"] = "Please choose a later time"
+      else if (time > Date.now() + MAX_DAYS_AHEAD * 86_400_000) found["fulfilment.requestedFor"] = `Please choose a date within the next ${MAX_DAYS_AHEAD} days`
+    }
+    if (Object.keys(found).length > 0) {
+      setErrors(found)
       setSubmitting(false)
+      window.requestAnimationFrame(() => formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus())
       return
     }
 
@@ -94,21 +124,7 @@ export function OrderForm() {
       const response = await fetch("/api/orders", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          idempotencyKey: idempotencyKey.current,
-          turnstileToken: token,
-          website: text("website"),
-          elapsedMs: Math.round(performance.now() - mountedAt.current),
-          customer: { name: text("name"), phone: text("phone"), email: text("email") },
-          fulfilment: {
-            type: fulfilment,
-            area: fulfilment === "delivery" ? text("area") : "",
-            address: fulfilment === "delivery" ? text("address") : "",
-            requestedFor: requestedFor.toISOString(),
-          },
-          notes: text("notes"),
-          items: lines.map((line) => ({ productId: line.productId, quantity: line.quantity })),
-        }),
+        body: JSON.stringify(payload),
       })
       const body = (await response.json().catch(() => ({}))) as {
         reference?: string
@@ -134,6 +150,7 @@ export function OrderForm() {
       } else if (response.status === 429) setFormError("Too many requests from this number or device. Please try again later.")
       else if (response.status === 503) setFormError(body.notice ?? "We are not taking online requests right now. Please check back soon.")
       else if (response.status === 403) setFormError("We could not verify you are human. Please try again.")
+      else if (response.status === 400) setFormError("Please check your details and the time you chose, then try again.")
       else setFormError("Something went wrong. Please try again in a moment.")
       setResetSignal((value) => value + 1)
     } catch {
@@ -167,10 +184,8 @@ export function OrderForm() {
     )
   }
 
-  const fallback = categoryPhotography[0]
-
   return (
-    <form onSubmit={onSubmit} className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]" noValidate>
+    <form ref={formRef} onSubmit={onSubmit} className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]" noValidate>
       <section aria-labelledby="items-heading" className="space-y-4">
         <h2 id="items-heading" className="font-serif text-xl text-foreground">Your items</h2>
         <ul className="space-y-3" role="list">
@@ -179,7 +194,7 @@ export function OrderForm() {
             return (
               <li key={line.productId} className="flex items-center gap-3 rounded-2xl border border-border bg-surface-elevated p-3">
                 <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-surface">
-                  <MediaImage image={line.image} fallback={fallback} alt={line.name} sizes="64px" className="object-cover" />
+                  <MediaImage image={line.image} alt={line.name} sizes="64px" className="object-cover" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-serif text-base text-foreground">{line.name}</p>
@@ -251,7 +266,7 @@ export function OrderForm() {
         )}
 
         <Field id="requestedFor" label="When do you need it?" error={errors["fulfilment.requestedFor"]} hint={leadHours > 0 ? `Your items need about ${leadHours} ${leadHours === 1 ? "hour" : "hours"} of notice.` : undefined}>
-          <input id="requestedFor" name="requestedFor" type="datetime-local" min={earliest} required className={inputClass} aria-invalid={Boolean(errors["fulfilment.requestedFor"])} aria-describedby={errors["fulfilment.requestedFor"] ? "requestedFor-error" : leadHours > 0 ? "requestedFor-hint" : undefined} />
+          <input id="requestedFor" name="requestedFor" type="datetime-local" min={earliest} max={latest} required className={inputClass} aria-invalid={Boolean(errors["fulfilment.requestedFor"])} aria-describedby={errors["fulfilment.requestedFor"] ? "requestedFor-error" : leadHours > 0 ? "requestedFor-hint" : undefined} />
         </Field>
 
         <Field id="notes" label="Notes for the kitchen (optional)" error={errors.notes}>

@@ -6,9 +6,8 @@ import type { MediaAsset } from "@/types/media"
 
 type MediaImageProps = {
   image: Pick<MediaAsset, "provider" | "publicId" | "url" | "alt"> | null | undefined
-  /** Shown when there is no uploaded image yet (approved placeholder photography). */
-  fallback: { src: string; alt: string }
   sizes: string
+  /** Used only when the uploaded image has no description of its own. */
   alt?: string
   className?: string
   priority?: boolean
@@ -18,13 +17,22 @@ function cloudinaryLoader({ src, width, quality }: ImageLoaderProps): string {
   return cloudinaryUrl(src, width, quality)
 }
 
-/** next/image wrapper: Cloudinary assets are resized by Cloudinary; other sources use the default pipeline. */
-export function MediaImage({ image, fallback, sizes, alt, className, priority }: MediaImageProps) {
+/** next/image wrapper: Cloudinary assets are resized by Cloudinary. Without a photo it shows a neutral block, never a stand-in picture. */
+export function MediaImage({ image, sizes, alt, className, priority }: MediaImageProps) {
+  const description = image?.alt || alt || ""
+
   if (image?.provider === "cloudinary" && image.publicId) {
-    return <Image src={image.publicId} loader={cloudinaryLoader} alt={alt || image.alt} fill sizes={sizes} className={className} priority={priority ?? false} />
+    return <Image src={image.publicId} loader={cloudinaryLoader} alt={description} fill sizes={sizes} className={className} loading={priority ? "eager" : "lazy"} />
   }
   if (image?.url) {
-    return <Image src={image.url} alt={alt || image.alt} fill sizes={sizes} className={className} priority={priority ?? false} unoptimized />
+    return <Image src={image.url} alt={description} fill sizes={sizes} className={className} loading={priority ? "eager" : "lazy"} unoptimized />
   }
-  return <Image src={fallback.src} alt={alt || fallback.alt} fill sizes={sizes} className={className} priority={priority ?? false} />
+  return (
+    <div aria-hidden="true" className="absolute inset-0 grid place-items-center bg-surface text-muted-foreground">
+      <svg viewBox="0 0 24 24" className="h-8 w-8 opacity-60" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="8" />
+        <circle cx="12" cy="12" r="4.5" />
+      </svg>
+    </div>
+  )
 }

@@ -148,9 +148,9 @@ export function OrdersAdmin() {
   return (
     <div>
       <h1 className="font-serif text-2xl text-foreground">Orders</h1>
-      <div className="mt-4 flex flex-wrap items-center gap-2" role="tablist" aria-label="Order status">
+      <div className="mt-4 flex flex-wrap items-center gap-2" role="group" aria-label="Filter orders by status">
         {tabs.map((entry) => (
-          <button key={entry.id} type="button" role="tab" aria-selected={tab === entry.id} onClick={() => setTab(entry.id)} className={`min-h-11 rounded-full border px-4 font-sans text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${tab === entry.id ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background text-foreground hover:bg-surface"}`}>
+          <button key={entry.id} type="button" aria-pressed={tab === entry.id} onClick={() => setTab(entry.id)} className={`min-h-11 rounded-full border px-4 font-sans text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${tab === entry.id ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background text-foreground hover:bg-surface"}`}>
             {entry.label} <span className="opacity-75">({counts[entry.id] ?? 0})</span>
           </button>
         ))}
@@ -163,7 +163,7 @@ export function OrdersAdmin() {
       {error && <div className="mt-4"><Message kind="error">{error}</Message></div>}
 
       <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-        <ul className="space-y-2" role="list" aria-label="Orders">
+        <ul className={`space-y-2 ${selected ? "hidden lg:block" : ""}`} role="list" aria-label="Orders">
           {loading && <li className="font-sans text-sm text-muted-foreground">Loading…</li>}
           {!loading && visible.length === 0 && <li className="rounded-xl border border-dashed border-border p-6 text-center font-sans text-sm text-muted-foreground">No orders here.</li>}
           {visible.map((order) => (
@@ -180,7 +180,7 @@ export function OrdersAdmin() {
           ))}
         </ul>
 
-        {selected ? <OrderDetail key={selected.id} order={selected} onChanged={reload} /> : (
+        {selected ? <OrderDetail key={selected.id} order={selected} onChanged={reload} onBack={() => setSelectedId(null)} /> : (
           <div className="hidden rounded-xl border border-dashed border-border p-8 text-center font-sans text-sm text-muted-foreground lg:block">Select an order to see its details.</div>
         )}
       </div>
@@ -188,7 +188,7 @@ export function OrdersAdmin() {
   )
 }
 
-function OrderDetail({ order, onChanged }: { order: Order; onChanged: () => void }) {
+function OrderDetail({ order, onChanged, onBack }: { order: Order; onChanged: () => void; onBack: () => void }) {
   const { supabase } = useAdmin()
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState<{ kind: "error" | "success"; text: string } | null>(null)
@@ -221,6 +221,7 @@ function OrderDetail({ order, onChanged }: { order: Order; onChanged: () => void
 
   return (
     <section aria-label={`Order ${order.reference}`} className="space-y-4 rounded-xl border border-border bg-surface-elevated p-4">
+      <button type="button" onClick={onBack} className="inline-flex min-h-11 items-center font-sans text-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden">&larr; All orders</button>
       <header className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <h2 className="font-serif text-xl text-foreground">{order.reference}</h2>

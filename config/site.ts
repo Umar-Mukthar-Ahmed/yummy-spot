@@ -38,7 +38,7 @@ export const siteConfig = {
    */
   whatsapp: {
     number: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "",
-    defaultMessage: "Hi! I'd like to place an order from Yummy Spot.",
+    defaultMessage: "Hi! I have a question about Yummy Spot.",
   },
 
   /** Social presence — populate when accounts are created */

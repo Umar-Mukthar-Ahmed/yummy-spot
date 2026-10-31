@@ -50,20 +50,8 @@ const nextConfig: NextConfig = {
           { key: "X-Content-Type-Options", value: "nosniff" },
           /* Deny framing to prevent clickjacking */
           { key: "X-Frame-Options", value: "DENY" },
-          /* Enable XSS filtering in legacy browsers */
-          { key: "X-XSS-Protection", value: "1; mode=block" },
           /* Control referrer info */
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-        ],
-      },
-      {
-        /* Cache static assets aggressively */
-        source: "/static/(.*)",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "public, max-age=31536000, immutable",
-          },
         ],
       },
     ]

@@ -1,6 +1,6 @@
 do $$
 declare
-  r jsonb; r2 jsonb; ok boolean;
+  r jsonb; r2 jsonb; r3 jsonb; ok boolean;
   cat uuid; p1 uuid; p_unpub uuid; p_oos uuid; p_lead uuid; p_quote uuid;
   admin uuid := gen_random_uuid(); other uuid := gen_random_uuid();
   oid uuid; oid2 uuid; n integer; i integer;
@@ -151,6 +151,13 @@ begin
   reset role;
   perform t.check('price-on-request flagged', (r2->>'ok')::boolean and (r2->>'needsPriceQuote')::boolean);
   select id into oid2 from orders where reference = r2->>'reference';
+  set local role service_role;
+  r3 := create_order(jsonb_build_object('idempotencyKey', 'key-quote-001',
+    'customer', jsonb_build_object('name', 'Cara', 'phone', '+919876500002'),
+    'fulfilment', jsonb_build_object('type', 'delivery', 'address', '12 Test Street', 'requestedFor', now() + interval '3 days'),
+    'items', jsonb_build_array(jsonb_build_object('productId', p_quote, 'quantity', 1))), 'iphash-c');
+  reset role;
+  perform t.check('price-on-request flag survives idempotent replay', (r3->>'duplicate')::boolean and (r3->>'needsPriceQuote')::boolean);
 
   -- 9. kill switch
   update site_settings set accepting_orders = false where id = 1;

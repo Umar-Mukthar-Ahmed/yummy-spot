@@ -83,7 +83,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   if (gate === "unconfigured") {
     return <Notice title="Admin is not configured">Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY, then redeploy.</Notice>
   }
-  if (onLogin && gate !== "ready") return <main id="main-content" className="min-h-dvh bg-background">{children}</main>
+  if (onLogin && gate !== "ready" && gate !== "denied") return <main id="main-content" className="min-h-dvh bg-background">{children}</main>
   if (gate === "loading" || gate === "signed-out") return <Notice title="Loading…" />
   if (gate === "denied") {
     return (
