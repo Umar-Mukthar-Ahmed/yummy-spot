@@ -119,7 +119,7 @@ Footer Grid:
 ### Mobile (< 768px)
 - Show: Logo + hamburger menu button (44×44px) + theme toggle
 - Hide: Desktop link list (`hidden md:flex`)
-- Hamburger opens full-screen slide-over drawer (Motion animated)
+- Hamburger opens full-screen slide-over drawer (CSS animated; no motion under `prefers-reduced-motion`)
 - Drawer: Logo × close button, full-width category links, WhatsApp CTA
 - Drawer closes on: Escape key, backdrop click, link navigation
 - Focus trap active while drawer is open (WCAG 2.4.3)

@@ -3,7 +3,7 @@
 > **Brand**: Yummy Spot
 > **Tagline**: *Homemade. Premium. Delivered.*
 > **Scope**: Order-request flow, owner flow, mobile ergonomics, accessibility
-> **Status**: Reflects the implemented flow. WhatsApp is a fallback contact, not the checkout.
+> **Status**: Reflects the implemented flow. WhatsApp is a secondary fallback contact, not the checkout. Customers are guests: there is no customer account, login or profile; Supabase Auth is only for `/admin`.
 
 ---
 
@@ -38,7 +38,7 @@
 
 | Step | Customer question | Solution in the product |
 | :---: | :--- | :--- |
-| 1 | Is this a real home kitchen? | Story, trust strip, real photography uploaded by the owner |
+| 1 | Is this a real home kitchen? | Story section (text only until the owner provides a real photo), a neutral "how ordering works" strip, and the owner's own dish photos. Claims about ingredients or delivery appear only after the owner confirms them |
 | 2 | Can I get it today? | Lead time and availability note on each dish; the form sets the earliest selectable time from the longest lead time in the basket |
 | 3 | Is it sold out? | "Not available right now" replaces the add button; the database also refuses it |
 | 4 | What will it cost? | Estimated total shown; items priced `0` show "Ask for today's price" and the total says the kitchen confirms the final price |

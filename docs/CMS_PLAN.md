@@ -24,7 +24,7 @@ The owner manages orders, the menu, photos and a few settings from `/admin`, a s
 | Route | Purpose |
 | :--- | :--- |
 | `/admin/login` | Email and password sign-in (Supabase Auth). Public signups are disabled. |
-| `/admin/orders` | Filter by New, In progress, Completed, Closed, All; search by name, phone or reference; live updates via Realtime; order detail with items, customer, notes; only valid status buttons; reject-with-reason; private notes; "Message customer on WhatsApp" link. |
+| `/admin/orders` | Filter by New, In progress, Completed, Closed, All; search by name, phone or reference; live updates via Realtime; colour-coded status badges and totals in the list; on phones the list and the order detail are separate views with a back button; order detail with items, customer, notes; only valid status buttons; Reject and Cancel are styled as destructive; reject-with-reason; private notes; "Message customer on WhatsApp" link. |
 | `/admin/products` | List with quick In stock and Published toggles; create and edit with category, prices, unit, lead time, dietary and labels, ingredients, allergens, photos (up to 6). |
 | `/admin/categories` | Create and edit, display order, visibility, featured, optional photo. |
 | `/admin/settings` | Pause or resume order requests (with a message), contact details, social links, pickup address, delivery areas. |

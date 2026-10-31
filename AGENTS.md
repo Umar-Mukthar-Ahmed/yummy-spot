@@ -7,9 +7,9 @@ This file instructs AI coding agents (Copilot, Cursor, etc.) on how to work with
 ## Project Overview
 
 **Yummy Spot** is a premium home-based food brand website.
-- Customers browse the menu and send a **multi-item order request** from the website. Requests are stored in Supabase and the owner works through them in the custom **`/admin`** area.
+- Customers browse the menu and send a **multi-item order request** from the website **as guests**: no account, no login, no profile. Supabase Auth exists only for `/admin`. Requests are stored in Supabase and the owner works through them in the custom **`/admin`** area.
 - There is **no payment gateway and no checkout**. The owner confirms availability, timing and the final price with the customer, then replies (optionally on WhatsApp).
-- WhatsApp buttons (hero, mobile nav, closing banner) remain as an optional fallback contact. The order flow does **not** depend on WhatsApp.
+- **CTA hierarchy:** the order-request journey is the primary action everywhere ("Browse the menu" on the hero and closing section, "Your request" in the header). WhatsApp is a secondary, outline-style fallback contact (hero, closing section, mobile menu, footer link, admin reply link). The order flow does **not** depend on WhatsApp.
 - Content (categories, products, settings, images) is managed by the owner in `/admin`. There is **no Payload and no third-party CMS**.
 - This is **NOT** a restaurant — it is an artisanal home kitchen brand.
 
@@ -76,7 +76,7 @@ Browser ──► Cloudinary: signed direct uploads (admin) and image delivery (
 
 ### 4. Server vs Client Components
 - **Default to Server Components** — do NOT add `"use client"` unless absolutely required.
-- Client Components are required for: `useState`, `useEffect`, `useRef`, browser APIs, `next-themes`, `motion/react`, Supabase browser calls, the order cart.
+- Client Components are required for: `useState`, `useEffect`, `useRef`, browser APIs, `next-themes`, Supabase browser calls, the order cart. Animation is CSS only (see Design and motion below); there is no animation library.
 - If only a small part of a component needs interactivity, extract it into a separate Client Component leaf.
 
 ### 5. Accessibility (WCAG 2.1 AA)
@@ -89,7 +89,9 @@ Browser ──► Cloudinary: signed direct uploads (admin) and image delivery (
 ### 6. No Invented Business Content
 - Do not hardcode product names, prices, descriptions, or category descriptions.
 - Business content comes from the Supabase database (managed in `/admin`) or from `config/`. The 10 category names and slugs are seeded from `supabase/seed.sql` and mirror `config/navigation.ts`.
-- Do not invent contact details, opening hours, delivery areas or testimonials. Placeholder UI is acceptable until the owner enters real data.
+- Do not invent contact details, opening hours, delivery areas, testimonials, ingredient or sourcing claims, or delivery promises. Copy that describes the kitchen ("no preservatives", "home delivery", "fresh ingredients", "traditional recipes") may only appear once the owner has confirmed it; until then use neutral copy that describes how the app works ("No account needed", "Kitchen confirms before anything is final").
+- Placeholder sections (testimonials, gallery) stay on the home page as clearly labelled empty states so they are ready for real content. They never contain invented quotes, stock photos of people or perpetual skeleton loaders.
+- Customer wording: **order request** (the flow), **your request** (selected dishes), **Send order request** (submit button). Do not say cart, basket or checkout.
 
 ---
 
@@ -156,7 +158,9 @@ app/
 
 **Planned pages are hidden, not linked.** `config/navigation.ts` has a `plannedRoutes` set. Header, mobile nav, footer and `app/sitemap.ts` skip those paths. When you build one of these pages, remove it from `plannedRoutes` and it appears everywhere. Privacy and Terms must exist before launch because the order form collects phone numbers and addresses.
 
-**Production never shows made-up content.** Dishes without a photo get a neutral block (`MediaImage` has no stock fallback). If the catalog cannot load, `/menu` shows an unavailable message with the WhatsApp button. Testimonials and the Instagram column on the home page are placeholders and render only when `NODE_ENV !== "production"`.
+**Production never shows made-up content.** Dishes without a photo get a neutral block (`MediaImage` has no stock fallback). If the catalog cannot load, `/menu` shows an unavailable message with the WhatsApp button. The Story, Testimonials and Gallery sections on the home page are honest placeholders (`components/home/community-sections.tsx`): they say that reviews and kitchen photos will appear once the owner provides them, and the story section has no portrait until a real owner or kitchen photo exists. The only remaining Unsplash image is the temporary hero photo in `config/food-photography.ts`; replace it with real photography and delete that file.
+
+**Design and motion.** Read [`docs/DESIGN_SYSTEM.md`](./docs/DESIGN_SYSTEM.md) before changing UI. Summary: shared button look comes from `buttonClass()` in `components/ui/button.tsx`; motion is CSS in `styles/animations.css` (`.enter`, `.animate-pop`, `.skeleton`, drawer keyframes), transform and opacity only, one-shot, never hiding content behind JavaScript, and switched off under `prefers-reduced-motion`. Do not add an animation library. Admin gets no decorative motion.
 
 **CSS cascade.** Global element styles in `globals.css` live inside `@layer base`. Do not put them outside a layer, or they override Tailwind utilities. The body uses `overflow-x: clip` (not `hidden`) so sticky headers keep working.
 
@@ -183,7 +187,8 @@ Full spec: [`docs/RESPONSIVE_DESIGN.md`](./docs/RESPONSIVE_DESIGN.md)
 - Touch targets: 44x44px minimum.
 - Typography: fluid `clamp()` values via `--text-*` tokens in `globals.css`.
 - Test in BOTH light and dark mode.
-- Test at: 320px, 375px, 390px, 768px, 1024px, 1440px, 1920px.
+- Test at: 320px, 375px, 390px, 768px, 1024px, 1280px, 1440px.
+- The test checklist is in [`docs/TESTING.md`](./docs/TESTING.md).
 
 ---
 
@@ -217,6 +222,8 @@ On Windows, run the OpenNext binary from `node_modules\.bin` (the scripts do thi
 | 9 | Planned | PWA and mobile enhancements |
 
 Optional features not yet added by decision: admin TOTP, order alerts, backups, keep-alive. See `FREE_TIER_NOTES.md`.
+
+V1 quality audit and UI/UX polish pass: complete on branch `audit/v1-quality` (design rules in `docs/DESIGN_SYSTEM.md`, checks in `docs/TESTING.md`). Still needed before launch: the first real-service end-to-end test, privacy and terms pages, real photography and the owner-confirmed content listed in `docs/DESIGN_SYSTEM.md`.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

@@ -56,14 +56,15 @@ with rationale so future engineers understand the *why* behind each choice.
 
 ---
 
-## 5. Animation: Motion (`motion/react`)
+## 5. Animation: CSS only (supersedes the earlier Motion decision)
 
-**Decision**: Motion v12 (`motion` package, imported from `"motion/react"`).
+**Decision**: no animation library. Motion lives in `styles/animations.css` as a handful of keyframes and utility classes (`.enter`, `.animate-pop`, `.animate-fade-in`, drawer in/out, `.skeleton` shimmer) plus Tailwind transitions.
 
 **Rationale**:
-- Motion is the spiritual successor to Framer Motion with the same API, now decoupled from Framer's design tool.
-- Animation presets are defined in `constants/animation.ts` (easing curves, duration scales, variant factories) so all motion across the site shares the same feel without ad-hoc values.
-- `@media (prefers-reduced-motion: reduce)` is handled globally in `globals.css`, disabling all transitions for users who opt out.
+- The earlier plan used Motion (`motion/react`). It was only used for scroll reveals that made content invisible until JavaScript ran, an endless floating hero image and the mobile drawer. All of that is now CSS, so the `motion` package was removed (smaller client bundle, content visible without JavaScript).
+- Rules: animate transform and opacity only, one-shot entrances, no looping animation except loading indicators, brief durations (150 ms feedback, 250 to 400 ms UI, 500 ms entrances).
+- `prefers-reduced-motion: reduce` is honoured twice: the global rule in `globals.css` and explicit overrides in `animations.css` that switch off entrances, the quantity pop and the skeleton shimmer.
+- The admin area uses no decorative motion, only feedback (message fade-in, spinner).
 
 ---
 

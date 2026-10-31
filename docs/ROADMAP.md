@@ -57,13 +57,13 @@ See [`RESPONSIVE_DESIGN.md`](./RESPONSIVE_DESIGN.md) for detailed implementation
 - **Key Deliverables**:
   - Next.js App Router, React 19, Tailwind CSS v4, TypeScript strict mode
   - Design system (`globals.css`): `@theme inline` CSS variables, light/dark themes
-  - Component primitives: Button, Badge, Card, Divider, Heading, Text, Logo, ThemeToggle
+  - Component primitives: Button (`buttonClass`), Badge, Divider, Heading, Text, Logo, ThemeToggle, Skeleton
   - Layout components: Navbar, Footer, Container, Section
   - Providers: ThemeProvider (next-themes), root composition (`providers/index.tsx`)
   - Hooks: `useMounted`, `useMediaQuery`
   - App routes: `sitemap.ts`, `robots.ts`, `manifest.ts`, `not-found.tsx`, `error.tsx`, `loading.tsx`
   - Utilities: `lib/utils.ts` (cn, buildWhatsAppUrl, formatPrice, slugify), `lib/env.ts`, `lib/seo.tsx`
-  - Constants: `constants/animation.ts`, `constants/breakpoints.ts`, `constants/colors.ts`
+  - Constants: `constants/breakpoints.ts` (the old `constants/animation.ts` and `constants/colors.ts` were removed in the V1 polish pass)
   - Types: `types/site.ts`, `types/seo.ts`
   - Config: `config/site.ts`, `config/navigation.ts`, `config/metadata.ts`, `config/theme.ts`
   - Dev tooling: ESLint flat config, Prettier + prettier-plugin-tailwindcss, `.env.example`
@@ -89,9 +89,9 @@ See [`RESPONSIVE_DESIGN.md`](./RESPONSIVE_DESIGN.md) for detailed implementation
 - **Responsive Requirement**: All components must pass at 320px minimum width.
 - **Key Deliverables**:
   - Fluid typography via `clamp()` for all heading sizes
-  - Mobile slide-out navigation drawer (Motion animated, focus-trapped, touch gesture support)
+  - Mobile slide-out navigation drawer (CSS animated, focus-trapped, returns focus to the menu button)
   - WhatsApp CTA Button variant (high-contrast emerald green, `min-h-[44px]`)
-  - Dietary badge set: Pure Veg, Sugar-Free, No Preservatives
+  - Dietary tags come from the product data (admin-editable); the old preset badge component was removed
   - Skeleton/loading placeholder components
   - Rich footer with social icons and culinary hygiene notices
   - `<Breadcrumb />` component for category/product pages

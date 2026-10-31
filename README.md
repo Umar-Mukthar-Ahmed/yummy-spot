@@ -11,7 +11,7 @@ A premium home-based food brand website. Customers browse the menu and send a mu
 | Layer | Technology |
 | :--- | :--- |
 | Framework | Next.js 16 App Router, React 19, TypeScript (strict) |
-| Styling | Tailwind CSS v4 (CSS-first `@theme inline`), Motion, next-themes |
+| Styling | Tailwind CSS v4 (CSS-first `@theme inline`), CSS-only motion, next-themes |
 | Hosting | Cloudflare Workers **Free** via `@opennextjs/cloudflare` |
 | Database + admin login | Supabase **Free** (PostgreSQL, Auth, Realtime) |
 | Images | Cloudinary **Free** (signed direct uploads, resized delivery) |
@@ -24,12 +24,20 @@ No Payload, no other CMS, no paid services.
 
 ## How ordering works
 
-1. A customer adds dishes to a **request** (kept in their browser) and opens `/order`.
-2. They enter name, phone, delivery or pickup details and a wanted time, and pass Turnstile.
+1. A customer, **as a guest (no account)**, adds dishes to a **request** (kept in their browser) and opens `/order`.
+2. They choose pickup or delivery, enter name, phone and a wanted time, and pass Turnstile.
 3. `POST /api/orders` validates the request and calls the database function `create_order`, which checks availability and lead times, computes prices from the database, blocks duplicates and rate-limits abusers.
-4. The owner sees the request in `/admin/orders`, confirms or rejects it, moves it through preparing, ready and delivered, and can message the customer on WhatsApp from the order screen.
+4. The owner sees the request in `/admin/orders`, confirms or rejects it, moves it through preparing, ready and delivered, and can message the customer on WhatsApp from the order screen. Supabase Auth is used for the admin only.
 
-There is no online payment. WhatsApp buttons on the site remain as an optional way to contact the kitchen.
+There is no online payment. The order request is the primary call to action on every page; WhatsApp is a secondary, optional way to contact the kitchen.
+
+---
+
+## Design, accessibility and testing
+
+- Visual system, motion rules, imagery rules and customer wording: [`docs/DESIGN_SYSTEM.md`](./docs/DESIGN_SYSTEM.md).
+- Responsive, accessibility, reduced-motion and smoke-test checklist, plus what has and has not been tested against real services: [`docs/TESTING.md`](./docs/TESTING.md).
+- Content that still needs the owner (real photos, confirmed claims, legal pages): see the "Owner decisions" list in `docs/DESIGN_SYSTEM.md`.
 
 ---
 

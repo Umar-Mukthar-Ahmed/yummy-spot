@@ -45,16 +45,14 @@ Complete reference for every technology in the stack with version pins, rational
 
 ## Animation
 
-| Package | Version | Role | Notes |
-| :--- | :--- | :--- | :--- |
-| `motion` | 12.x | Animation library | Import from `"motion/react"` — successor to framer-motion |
+| Approach | Role | Notes |
+| :--- | :--- | :--- |
+| CSS keyframes and transitions | All motion | Defined in `styles/animations.css`; no library. The earlier `motion` package was removed. |
 
 ### Usage Pattern
-```typescript
-import { motion } from "motion/react"
-import { MOTION_VARIANTS } from "@/constants/animation"
-
-<motion.div variants={MOTION_VARIANTS.fadeInUp} initial="hidden" animate="visible" />
+```tsx
+// One-shot entrance with an optional stagger index
+<li className="enter" style={{ "--i": index } as React.CSSProperties}>…</li>
 ```
 
 ---
@@ -139,7 +137,7 @@ Not used: Payload or any CMS package, `@supabase/ssr`, Cloudinary SDKs, R2, D1, 
 
 | Technology | Why NOT |
 | :--- | :--- |
-| `framer-motion` | Replaced by `motion` (same API, standalone package) |
+| `framer-motion` / `motion` | CSS covers every animation we use (see `docs/ARCHITECTURE.md` section 5); content must not wait for JavaScript |
 | `tailwind.config.js` | Tailwind v4 is CSS-first — config lives in `globals.css` |
 | `axios` | `fetch` is native in Node 18+ and Next.js; no need for axios |
 | `lodash` | Tree-shakeable custom utils in `lib/utils.ts` cover all needs |
