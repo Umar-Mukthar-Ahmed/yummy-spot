@@ -4,7 +4,6 @@ import { Section } from "@/components/layout/section"
 import { Heading } from "@/components/shared/heading"
 import { Text } from "@/components/shared/text"
 import { ProductBrowser } from "@/components/menu/product-browser"
-import { catalogProducts } from "@/lib/catalog"
 
 export const metadata: Metadata = {
   title: "Our Menu",
@@ -20,6 +19,6 @@ export default function MenuPage() {
       <Heading as="h1" size="4xl">Explore the menu</Heading>
       <Text variant="muted" size="lg" className="mt-3">Find something made with care, all in one place.</Text>
     </header>
-    <ProductBrowser products={catalogProducts} />
+    <ProductBrowser />
   </Container></Section>
 }

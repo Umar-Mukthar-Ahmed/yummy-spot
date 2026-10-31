@@ -33,7 +33,7 @@ export const siteConfig = {
   ],
 
   /**
-   * WhatsApp ordering
+   * WhatsApp fallback contact (the main flow is the in-app order request)
    * number: International format without the leading '+' (e.g. "919876543210")
    */
   whatsapp: {

@@ -5,7 +5,7 @@
  * Changing URLs or labels happens only here — no link rot.
  *
  * Category slugs are authoritative: they define Menu query parameters
- * and must match CMS content slugs.
+ * and must match the slugs seeded in supabase/seed.sql.
  */
 
 /* ── Types ──────────────────────────────────────────────────── */

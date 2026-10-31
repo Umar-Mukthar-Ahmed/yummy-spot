@@ -18,7 +18,7 @@
 | [P2] Core UI Foundation ──► [P3] Homepage ──► [P4] Menu & Catalog ──► [P5] Secondary     |
 |                                                                          │                |
 |                                                                          ▼                |
-| [P9] PWA & Mobile  ◄──  [P8] Analytics  ◄──  [P7] SEO & Perf  ◄──  [P6] CMS Integration |
+| [P9] PWA & Mobile  ◄──  [P8] Analytics  ◄──  [P7] SEO & Perf  ◄──  [P6] Backend & Admin  |
 |                                                                                           |
 | [*] Tech Debt & Ongoing Hardening                                                         |
 +-------------------------------------------------------------------------------------------+
@@ -75,17 +75,17 @@ See [`RESPONSIVE_DESIGN.md`](./RESPONSIVE_DESIGN.md) for detailed implementation
 - **Key Deliverables**:
   - [`CONTENT_ARCHITECTURE.md`](./CONTENT_ARCHITECTURE.md) — content hierarchy, navigation structure, search
   - [`PRODUCT_MODEL.md`](./PRODUCT_MODEL.md) — TypeScript interfaces, Zod schemas, data relationships
-  - [`CMS_PLAN.md`](./CMS_PLAN.md) — CMS evaluation → Payload CMS v3, owner workflows, ISR revalidation
+  - [`CMS_PLAN.md`](./CMS_PLAN.md) — custom admin plan (replaces the original Payload CMS plan), owner workflows, security model
   - [`SITE_MAP.md`](./SITE_MAP.md) — URL tree, dynamic routes, rendering strategy, 10 category slugs
   - [`SEO_PLAN.md`](./SEO_PLAN.md) — keyword taxonomy, JSON-LD schemas, dynamic OG, Core Web Vitals targets
-  - [`USER_FLOW.md`](./USER_FLOW.md) — customer journeys, WhatsApp templates, friction solutions, WCAG flows
+  - [`USER_FLOW.md`](./USER_FLOW.md) — customer and owner journeys, order-request flow, friction solutions, WCAG flows
   - [`RESPONSIVE_DESIGN.md`](./RESPONSIVE_DESIGN.md) — responsive implementation spec
   - [`ROADMAP.md`](./ROADMAP.md) — this document
 
 ---
 
 ### Phase 2: Core UI Foundation & Design System
-- **Status**: Ready for Execution · **Effort**: L · **Dependencies**: Phase 0, Phase 1
+- **Status**: Complete · **Effort**: L · **Dependencies**: Phase 0, Phase 1
 - **Responsive Requirement**: All components must pass at 320px minimum width.
 - **Key Deliverables**:
   - Fluid typography via `clamp()` for all heading sizes
@@ -101,7 +101,7 @@ See [`RESPONSIVE_DESIGN.md`](./RESPONSIVE_DESIGN.md) for detailed implementation
 ---
 
 ### Phase 3: Marketing Homepage
-- **Status**: Planned · **Effort**: L · **Dependencies**: Phase 2
+- **Status**: Complete · **Effort**: L · **Dependencies**: Phase 2
 - **Responsive Requirement**: Hero must be stunning at 320px AND 1920px.
 - **Key Deliverables**:
   - Hero Section: headline (fluid clamp type), food montage, trust badges, CTA
@@ -115,7 +115,7 @@ See [`RESPONSIVE_DESIGN.md`](./RESPONSIVE_DESIGN.md) for detailed implementation
 ---
 
 ### Phase 4: Menu & Product Catalog Hub
-- **Status**: Planned · **Effort**: XL · **Dependencies**: Phase 2, Phase 3
+- **Status**: Complete (single `/menu` page; no separate product pages) · **Effort**: XL · **Dependencies**: Phase 2, Phase 3
 - **Responsive Requirement**: Product grid 1-col (mobile) → 2-col (tablet) → 3-col (desktop).
 - **Key Deliverables**:
   - Menu Hub (`/menu`): category grid, search bar, dietary filter chips
@@ -138,15 +138,16 @@ See [`RESPONSIVE_DESIGN.md`](./RESPONSIVE_DESIGN.md) for detailed implementation
 
 ---
 
-### Phase 6: Headless CMS Integration
-- **Status**: Planned · **Effort**: XL · **Dependencies**: Phase 4, Phase 5
-- **Key Deliverables**:
-  - Payload CMS v3 at `/admin` (embedded in Next.js App Router)
-  - PostgreSQL / Supabase + Cloudflare R2 media storage
-  - Content schemas: Products, Categories, Gallery, Reviews, Banners, Site Settings
-  - Webhook endpoint (`/api/revalidate`) for on-demand ISR cache invalidation
-  - Media pipeline: auto WebP/AVIF + responsive thumbnails
-  - Owner onboarding: 2-page laminated guide + mobile PWA shortcut
+### Phase 6: Backend, Order Requests & Custom Admin (free-first)
+- **Status**: Built, awaiting the first real end-to-end test · **Effort**: XL · **Dependencies**: Phase 4
+- **Key Deliverables** (all on free tiers, see [`FREE_TIER_NOTES.md`](../FREE_TIER_NOTES.md)):
+  - Supabase PostgreSQL schema, Row Level Security, `create_order` function, status workflow (`supabase/migrations`)
+  - Catalog (products, categories) loaded from Supabase on `/menu` and the homepage
+  - Multi-item order request: cart, `/order`, `POST /api/orders`, Cloudflare Turnstile, rate limits
+  - Custom `/admin` with Supabase Auth: orders, products, categories, settings
+  - Cloudinary Free for images (signed direct uploads, resized delivery)
+  - Cloudflare Workers Free deployment via OpenNext
+  - Not included by decision: Payload or any CMS, R2, D1, Durable Objects, ISR revalidation, TOTP, alerts, backups
 
 ---
 
@@ -195,11 +196,11 @@ See [`RESPONSIVE_DESIGN.md`](./RESPONSIVE_DESIGN.md) for detailed implementation
 | :---: | :--- | :---: | :---: | :--- |
 | **0** | Repo & Architecture Foundation | M | Low | ✅ Complete |
 | **1** | Information Architecture | M | Low | ✅ Complete |
-| **2** | Core UI Foundation & Design System | L | Low | ⬜ Planned |
-| **3** | Marketing Homepage | L | Medium | ⬜ Planned |
-| **4** | Menu & Product Catalog Hub | XL | Medium | ⬜ Planned |
+| **2** | Core UI Foundation & Design System | L | Low | ✅ Complete |
+| **3** | Marketing Homepage | L | Medium | ✅ Complete |
+| **4** | Menu & Product Catalog Hub | XL | Medium | ✅ Complete |
 | **5** | Secondary & Editorial Pages | M | Low | ⬜ Planned |
-| **6** | Headless CMS Integration | XL | High | ⬜ Planned |
+| **6** | Backend, Order Requests & Custom Admin | XL | High | 🟨 Built, awaiting end-to-end test |
 | **7** | SEO, Social Graph & Web Vitals | M | Low | ⬜ Planned |
 | **8** | Analytics & Event Tracking | S | Low | ⬜ Planned |
 | **9** | PWA & Mobile Enhancements | M | Low | ⬜ Planned |

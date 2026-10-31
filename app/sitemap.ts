@@ -7,10 +7,10 @@ import { siteConfig } from "@/config/site"
  * Auto-generates /sitemap.xml for search engine crawlers.
  *
  * Categories and products are sections on /menu, not separate URLs.
- * The CMS can later populate the single menu route and its structured data.
+ * /order and /admin are intentionally left out (noindex).
  *
  * @see https://nextjs.org/docs/app/api-reference/file-conventions/metadata/sitemap
- * @phase Phase 6 — populate the /menu catalog from the CMS; keep one catalog URL
+ * @phase Phase 7 — add structured data to the single /menu catalog URL
  */
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = siteConfig.url

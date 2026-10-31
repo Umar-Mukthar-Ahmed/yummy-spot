@@ -2,215 +2,101 @@
 
 > **Homemade. Premium. Delivered.**
 
-A premium home-based food brand website built with Next.js App Router. Customers browse handcrafted meals, desserts, wellness foods, and seasonal specials — then place orders directly via WhatsApp.
+A premium home-based food brand website. Customers browse the menu and send a multi-item order request; the owner reviews and manages requests, products and photos in a built-in admin. Everything runs on free tiers; only the domain name costs money (see [FREE_TIER_NOTES.md](./FREE_TIER_NOTES.md)).
 
 ---
 
-## Tech Stack
+## Stack
 
 | Layer | Technology |
 | :--- | :--- |
-| Framework | Next.js 15 App Router |
-| Language | TypeScript (strict mode) |
-| Styling | Tailwind CSS v4 (CSS-first `@theme inline`) |
-| Animation | Motion (`motion/react`) |
-| Themes | next-themes |
+| Framework | Next.js 16 App Router, React 19, TypeScript (strict) |
+| Styling | Tailwind CSS v4 (CSS-first `@theme inline`), Motion, next-themes |
+| Hosting | Cloudflare Workers **Free** via `@opennextjs/cloudflare` |
+| Database + admin login | Supabase **Free** (PostgreSQL, Auth, Realtime) |
+| Images | Cloudinary **Free** (signed direct uploads, resized delivery) |
+| Spam protection | Cloudflare Turnstile |
 | Validation | Zod v4 |
-| Fonts | Fraunces (serif) + Manrope (sans) via `next/font` |
-| Formatting | Prettier + prettier-plugin-tailwindcss |
+
+No Payload, no other CMS, no paid services.
 
 ---
 
-## Getting Started
+## How ordering works
 
-### 1. Install dependencies
+1. A customer adds dishes to a **request** (kept in their browser) and opens `/order`.
+2. They enter name, phone, delivery or pickup details and a wanted time, and pass Turnstile.
+3. `POST /api/orders` validates the request and calls the database function `create_order`, which checks availability and lead times, computes prices from the database, blocks duplicates and rate-limits abusers.
+4. The owner sees the request in `/admin/orders`, confirms or rejects it, moves it through preparing, ready and delivered, and can message the customer on WhatsApp from the order screen.
+
+There is no online payment. WhatsApp buttons on the site remain as an optional way to contact the kitchen.
+
+---
+
+## Getting started
 
 ```bash
 npm install
+cp .env.example .env.local     # fill in values (see comments in the file)
+npm run dev                    # http://localhost:3000
 ```
 
-### 2. Set up environment variables
+The storefront renders without any environment variables (placeholders are shown). Ordering, the real menu and `/admin` need the Supabase, Cloudinary and Turnstile values.
 
-```bash
-cp .env.example .env.local
-```
+### Environment variables
 
-Edit `.env.local` and fill in the values (see comments in the file).
+`.env.example` lists every variable and marks it **public** (safe in the browser, baked in at build time) or **secret** (server only). Use:
 
-### 3. Run the dev server
+| File | Used by |
+| :--- | :--- |
+| `.env.local` | `npm run dev` and builds (public values, plus secrets for local API routes) |
+| `.env.production.local` | Production builds, overrides `.env.local` (real Turnstile keys, real app URL) |
+| `.dev.vars` | `npm run cf:preview` (secrets read by the local Worker) |
+| `wrangler secret put NAME` | Production secrets on Cloudflare |
 
-```bash
-npm run dev
-```
+All of these are gitignored. Never commit real values.
 
-Open [http://localhost:3000](http://localhost:3000).
+### Database
 
-### 4. Format code
+Apply the files in `supabase/migrations/` in order (Supabase dashboard, SQL editor), then `supabase/seed.sql`. Create the owner in Supabase Auth, then add them to `admin_users` (the command is in the comments of the first migration).
 
-```bash
-npm run format
-```
-
-### 5. Lint
+### Scripts
 
 ```bash
 npm run lint
+npm run build
+npm run cf:preview     # OpenNext build + local Cloudflare runtime
+npm run cf:deploy      # deploy to Cloudflare (after the end-to-end test passes)
 ```
 
 ---
 
-## Project Structure
+## Project structure
 
 ```
-yummy-spot/
-├── app/                    # Next.js App Router
-│   ├── layout.tsx          # Root layout (Navbar, Footer, Providers)
-│   ├── page.tsx            # Homepage placeholder
-│   ├── globals.css         # Tailwind v4 @theme inline design system
-│   ├── not-found.tsx       # 404 page
-│   ├── error.tsx           # Error boundary
-│   ├── loading.tsx         # Root loading UI
-│   ├── sitemap.ts          # Auto-generated sitemap.xml
-│   ├── robots.ts           # Auto-generated robots.txt
-│   └── manifest.ts         # PWA manifest
-│
-├── components/
-│   ├── layout/             # Structural components
-│   │   ├── navbar.tsx      # Sticky site header
-│   │   ├── footer.tsx      # Site-wide footer
-│   │   ├── container.tsx   # Horizontal constraint + gutters
-│   │   └── section.tsx     # Vertical spacing wrapper
-│   ├── ui/                 # Design system primitives
-│   │   ├── button.tsx      # Button (5 variants, 4 sizes, loading state)
-│   │   ├── badge.tsx       # Badge (7 variants)
-│   │   ├── card.tsx        # Card compound components
-│   │   └── divider.tsx     # Horizontal/vertical separator
-│   └── shared/             # Cross-cutting components
-│       ├── heading.tsx     # Semantic heading with decoupled sizing
-│       ├── text.tsx        # Polymorphic text primitive
-│       ├── logo.tsx        # Brand logo (typographic)
-│       └── theme-toggle.tsx # Dark/light mode toggle
-│
-├── config/                 # Single-source-of-truth configuration
-│   ├── site.ts             # Brand identity, URLs, WhatsApp config
-│   ├── navigation.ts       # Primary nav, footer nav, category slugs
-│   ├── metadata.ts         # Metadata factory for OG/Twitter/canonical
-│   └── theme.ts            # Theme configuration and token map
-│
-├── constants/
-│   ├── animation.ts        # Motion easing curves and variants
-│   ├── breakpoints.ts      # Breakpoints mirroring Tailwind v4
-│   └── colors.ts           # Raw brand color primitives
-│
-├── docs/                   # Architecture documentation
-│   ├── ARCHITECTURE.md     # Technical architecture decisions
-│   ├── CMS_PLAN.md         # CMS evaluation and owner workflows
-│   ├── CONTENT_ARCHITECTURE.md # Content hierarchy and IA
-│   ├── PRODUCT_MODEL.md    # TypeScript types and Zod schemas
-│   ├── RESPONSIVE_DESIGN.md # Responsive implementation spec
-│   ├── ROADMAP.md          # Engineering roadmap (Phases 0-9)
-│   ├── SEO_PLAN.md         # SEO strategy and JSON-LD schemas
-│   ├── SITE_MAP.md         # URL structure and routing
-│   ├── TECH_STACK.md       # Technology choices and rationale
-│   └── USER_FLOW.md        # Customer journeys and WhatsApp flows
-│
-├── hooks/
-│   ├── use-mounted.ts      # SSR-safe hydration state
-│   └── use-media-query.ts  # Reactive media query hook
-│
-├── lib/
-│   ├── utils.ts            # cn(), buildWhatsAppUrl(), formatPrice(), slugify()
-│   ├── env.ts              # Zod v4 environment variable validation
-│   └── seo.tsx             # JSON-LD schema factories + Server Component renderer
-│
-├── providers/
-│   ├── theme-provider.tsx  # next-themes wrapper
-│   └── index.tsx           # Root provider composition
-│
-├── styles/
-│   └── animations.css      # Keyframes and animation utilities
-│
-├── types/
-│   ├── site.ts             # SiteConfig, NavItem, FooterNavGroup
-│   ├── seo.ts              # JSON-LD schema types
-│   └── index.ts            # Barrel exports
-│
-├── .env.example            # Environment variable template
-├── .env.local              # Local dev secrets (gitignored)
-├── .prettierrc             # Prettier config with Tailwind class sorting
-├── .prettierignore         # Prettier ignore patterns
-├── next.config.ts          # Next.js config (images, headers, Turbopack)
-└── tsconfig.json           # Strict TypeScript config
+app/            routes: /, /menu, /order, /admin/*, /api/orders, /api/admin/media/sign
+components/     layout, ui, shared, home, menu, order (cart + form + Turnstile), admin
+config/         site, navigation, metadata, theme
+lib/            catalog, media (Cloudinary boundary), supabase clients, validation, env
+supabase/       migrations (schema, RLS, create_order function) and seed.sql
+docs/           architecture, product model, admin plan, user flow, roadmap, SEO
 ```
-
----
-
-## Design System
-
-### Themes
-- **Light**: Warm off-white (`hsl(36 22% 97%)`) with amber-brown primary
-- **Dark**: Deep warm charcoal (`hsl(25 14% 7%)`) with softened amber
-
-Toggle via the moon/sun button in the navbar.
-
-### Typography
-- **Headings**: Fraunces (serif) — editorial, warm, premium
-- **Body/UI**: Manrope (sans-serif) — clean, modern, readable
-- **Type scale**: Fluid `clamp()` values — scales from 320px to 1920px
-
-### Color Tokens (semantic)
-```
-background        surface           border
-foreground        surface-elevated  border-subtle
-primary           muted             accent
-primary-foreground muted-foreground accent-foreground
-destructive       success           warning
-ring              overlay
-```
-
-### Responsive Breakpoints
-320px · 375px · 390px · 768px · 1024px · 1440px · 1920px
-
----
-
-## Ordering Flow
-
-Customers browse the product catalog, then tap **"Order via WhatsApp"** which opens WhatsApp with a pre-filled message template:
-
-```
-*NEW ORDER — YUMMY SPOT* 🍲
----------------------------------------
-*Dish:* Mutton Mandi Platter
-*Portion:* 2 (per box)
-*Estimated Price:* ₹2,500.00
-...
-```
-
-No checkout, no payment gateway — pure conversational commerce.
 
 ---
 
 ## Documentation
 
-All architecture decisions, content models, and roadmap are documented in [`/docs`](./docs/).
-
 | Document | Purpose |
 | :--- | :--- |
-| [ROADMAP.md](./docs/ROADMAP.md) | Phases 0-9 engineering roadmap |
-| [ARCHITECTURE.md](./docs/ARCHITECTURE.md) | Technical architecture decisions |
-| [PRODUCT_MODEL.md](./docs/PRODUCT_MODEL.md) | Data models and TypeScript types |
-| [SITE_MAP.md](./docs/SITE_MAP.md) | URL structure and routing strategy |
-| [SEO_PLAN.md](./docs/SEO_PLAN.md) | SEO strategy and JSON-LD schemas |
-| [CMS_PLAN.md](./docs/CMS_PLAN.md) | CMS evaluation and owner workflows |
-| [USER_FLOW.md](./docs/USER_FLOW.md) | Customer journeys |
-| [RESPONSIVE_DESIGN.md](./docs/RESPONSIVE_DESIGN.md) | Responsive implementation spec |
-
----
-
-## Current Phase
-
-**Phase 0 ✅ Complete** — Repository and architecture foundation  
-**Phase 1 ✅ Complete** — Information architecture and content model  
-**Phase 2 ⬜ Next** — Core UI foundation and design system completion
-
-See [ROADMAP.md](./docs/ROADMAP.md) for the full delivery plan.
+| [FREE_TIER_NOTES.md](./FREE_TIER_NOTES.md) | Free-tier limits, risks, and what we deliberately did not add |
+| [AGENTS.md](./AGENTS.md) | Rules and architecture for AI agents and contributors |
+| [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) | Technical decisions and the final free-first architecture |
+| [docs/PRODUCT_MODEL.md](./docs/PRODUCT_MODEL.md) | Catalog, media and order data model |
+| [docs/CMS_PLAN.md](./docs/CMS_PLAN.md) | Custom admin: screens, workflows, security |
+| [docs/USER_FLOW.md](./docs/USER_FLOW.md) | Customer and owner journeys |
+| [docs/ROADMAP.md](./docs/ROADMAP.md) | Phases and status |
+| [docs/SITE_MAP.md](./docs/SITE_MAP.md) | Routes |
+| [docs/CONTENT_ARCHITECTURE.md](./docs/CONTENT_ARCHITECTURE.md) | Information architecture blueprint |
+| [docs/SEO_PLAN.md](./docs/SEO_PLAN.md) | SEO strategy |
+| [docs/RESPONSIVE_DESIGN.md](./docs/RESPONSIVE_DESIGN.md) | Responsive implementation spec |
+| [docs/TECH_STACK.md](./docs/TECH_STACK.md) | Packages and rationale |

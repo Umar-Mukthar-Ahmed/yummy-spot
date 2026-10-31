@@ -6,8 +6,7 @@
  *
  * Provider ordering (outermost → innermost):
  *   ThemeProvider  — must be outermost to prevent flash of unstyled content
- *   [SupabaseProvider]  — future: database session context
- *   [QueryProvider]     — future: TanStack Query cache
+ *   RequestProvider — the customer's multi-item order request (localStorage)
  *   [AnalyticsProvider] — future: event tracking context
  *
  * Adding a new provider:
@@ -17,6 +16,7 @@
  */
 
 import { ThemeProvider } from "./theme-provider"
+import { RequestProvider } from "@/components/order/request-provider"
 
 type ProvidersProps = {
   children: React.ReactNode
@@ -25,10 +25,7 @@ type ProvidersProps = {
 export function Providers({ children }: ProvidersProps) {
   return (
     <ThemeProvider>
-      {/* SupabaseProvider — Phase 6: database integration */}
-      {/* QueryProvider   — Phase 6: server state caching  */}
-      {/* AnalyticsProvider — Phase 8: event tracking      */}
-      {children}
+      <RequestProvider>{children}</RequestProvider>
     </ThemeProvider>
   )
 }

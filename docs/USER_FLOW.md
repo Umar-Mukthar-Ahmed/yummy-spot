@@ -2,242 +2,129 @@
 
 > **Brand**: Yummy Spot
 > **Tagline**: *Homemade. Premium. Delivered.*
-> **Document Version**: 1.0.0
-> **Scope**: Conversational Commerce, State Transitions, Mobile Ergonomics, Accessibility
+> **Scope**: Order-request flow, owner flow, mobile ergonomics, accessibility
+> **Status**: Reflects the implemented flow. WhatsApp is a fallback contact, not the checkout.
 
 ---
 
-## 1. Primary Flow: Discovery to WhatsApp Order
-
-### 1.1 Flowchart
+## 1. Primary flow: discovery to order request
 
 ```
-[ Customer Arrives on Homepage (/) ]
-                 │
-                 ▼
-     [ Evaluates Hero & Trust Badges ]
-     (100% Homemade, Pure Ghee, No Preservatives)
-                 │
-                 ├──────────────────────────────────────────────┐
-                 │                                              │
-        (Clicks Category)                           (Uses Quick Search)
-                 │                                              │
-                 └──────────────────────┬───────────────────────┘
-                                        │
-                                        ▼
-                       [ Explores Category Showcase Page ]
-                       (/menu#category-biryani-mandi)
-                                        │
-                                        ▼
-                         [ Opens Product Detail Page (PDP) ]
-                         (/menu#product-mutton-mandi-platter)
-                                        │
-         ┌──────────────────────────────┴──────────────────────────────┐
-         │                                                             │
-  [ Evaluates Ingredients & Allergens ]          [ Checks Lead Time & Availability ]
-         │                                                             │
-         └──────────────────────────────┬──────────────────────────────┘
-                                        │
-                                        ▼
-                        [ Adjusts Portion Quantity (+/-) ]
-                                        │
-                                        ▼
-                  [ Clicks "Order via WhatsApp" CTA ]
-                                        │
-                                        ▼
-           [ Browser opens https://wa.me/XXXXX?text=... ]
-                                        │
-                                        ▼
-                [ WhatsApp Chat Opens with Pre-Filled Message ]
-                                        │
-                                        ▼
-                [ Customer Taps Send → Kitchen Confirms Slot ]
+[ Home (/) ] ──► [ Menu (/menu) ] ──► filter by category / dietary / search
+                         │
+                         ▼
+          [ Read dish details, lead time, availability ]
+                         │
+                         ▼
+             [ "Add to request" (+ / - quantity) ]
+                         │      (repeat for more dishes)
+                         ▼
+        [ Floating bar: "N items in your request · Review" ]
+                         │
+                         ▼
+                    [ /order ]
+   items, quantities, estimated total, name, phone,
+   delivery or pickup, wanted time, notes, Turnstile
+                         │
+                         ▼
+          [ "Request received" with a reference ]
+                         │
+                         ▼
+ [ Kitchen confirms availability, timing and the final price ]
+            (by phone or WhatsApp, started from /admin)
 ```
 
-### 1.2 Step Details & Decision Points
+### Step details and friction solutions
 
-| Step | User Action | Friction Gate | UX Solution |
-| :---: | :--- | :--- | :--- |
-| **1** | Lands on Homepage | Does this feel like a real home kitchen? | "Generational Family Kitchen" badge, hygiene photos |
-| **2** | Browses Categories | Which category fits today's mood? | Clear category titles, prep-time badges |
-| **3** | Views Category Page | Can I get this today or pre-order? | Badges: `Ready (4h)` vs `Weekend Pre-Order (12h)` |
-| **4** | Inspects Product Detail | Are there allergens? How much does it serve? | Prominent allergen checklist, explicit "Serves 2-3" |
-| **5** | Selects Quantity | Do I need extras? | Live price calculation, optional kitchen notes |
-| **6** | Clicks WhatsApp CTA | Will I have to re-type everything? | 100% pre-formatted message with dish, qty, total |
-| **7** | Handoff to WhatsApp | How do I pay? Is my delivery confirmed? | Kitchen owner replies with UPI QR + delivery slot |
+| Step | Customer question | Solution in the product |
+| :---: | :--- | :--- |
+| 1 | Is this a real home kitchen? | Story, trust strip, real photography uploaded by the owner |
+| 2 | Can I get it today? | Lead time and availability note on each dish; the form sets the earliest selectable time from the longest lead time in the basket |
+| 3 | Is it sold out? | "Not available right now" replaces the add button; the database also refuses it |
+| 4 | What will it cost? | Estimated total shown; items priced `0` show "Ask for today's price" and the total says the kitchen confirms the final price |
+| 5 | Do I have to type everything again? | The request is saved in the browser while they browse |
+| 6 | Is it safe to leave my number? | A short privacy note on the form; details are used only to prepare and deliver the order |
+| 7 | What happens next? | Confirmation shows a reference and says the kitchen will contact them |
+
+### Error states the customer can see
+
+| Situation | Message |
+| :--- | :--- |
+| Dish became unavailable | Names the dishes and asks the customer to remove them |
+| Not enough notice | Shows the earliest possible time |
+| Too many requests | Asks them to try again later |
+| Orders paused by the owner | Shows the owner's message |
+| Turnstile failed | Asks them to try again; the widget resets |
+| Server unreachable | Asks them to check the connection |
 
 ---
 
-## 2. Custom Catering & Event Concierge Flow
+## 2. Owner flow (admin)
 
 ```
-[ Customer visits /custom-order ]
-              │
-              ▼
-[ Interactive Multi-Step Concierge Form ]
-  ├── Step 1: Occasion (Wedding, Birthday, Housewarming, Pooja)
-  ├── Step 2: Guest Count (e.g., 20-50 guests)
-  ├── Step 3: Desired Date & Time Slot
-  ├── Step 4: Culinary Preferences (Veg, Non-Veg, Sweets, Snacks)
-  └── Step 5: Budget Range & Custom Notes
-              │
-              ▼
-[ Form compiles into a structured WhatsApp dispatch payload ]
-              │
-              ▼
-[ Taps "Submit Inquiry via WhatsApp" ]
-              │
-              ▼
-[ Kitchen owner receives structured briefing & replies with quotation ]
+[ /admin/login ] ──► [ Orders: New ] ──► open a request
+                                            │
+                  ┌─────────────────────────┼─────────────────────────┐
+                  ▼                         ▼                         ▼
+             Confirm                  Reject (reason)             Cancel
+                  │                         │
+                  ▼                         ▼
+        Start preparing ► Mark ready ►  message customer on WhatsApp
+                  ▼
+   Out for delivery (delivery) or Completed (pickup) ► Completed
 ```
+
+Customers are messaged from the admin with a pre-filled WhatsApp link to the customer's own number. The owner decides when to open a chat; customers cannot spam the owner's WhatsApp through the order form.
 
 ---
 
-## 3. Seasonal & Festival Discovery Flow
+## 3. Custom catering and events (planned)
 
-```
-[ Customer sees Announcement Banner or Hero Festival Banner ]
-("Diwali Artisan Sweet Boxes — Pre-Orders Now Live! Limited Batches")
-                             │
-                             ▼
-     [ Clicks Banner → Lands on /menu#category-festival-specials ]
-                             │
-                             ▼
-           [ Reviews Curated Festival Hampers & Boxes ]
-                             │
-                             ▼
-         [ Selects "Royal Saffron Mithai Hamper (1kg)" ]
-                             │
-                             ▼
-     [ Taps "Pre-Order for Festival Date" via WhatsApp ]
-```
+A guided `/custom-order` form for larger events is planned (Phase 5). Until then, custom orders can be requested through the **Custom Orders** category, the order notes field, or the WhatsApp fallback button.
 
 ---
 
-## 4. Returning Customer Accelerated Flow
+## 4. Seasonal and festival discovery
 
-```
-[ Customer opens bookmark: /menu#category-biryani-mandi ]
-                          │
-                          ▼
-        [ Locates Favorite Dish Instantly ]
-                          │
-                          ▼
-[ Taps "Quick Order" on Product Card (skipping full PDP) ]
-                          │
-                          ▼
-[ Instant WhatsApp Deep-Link → Order in under 10 seconds ]
-```
+Announcement banner and hero links point to `/menu?category=seasonal-specials` or `festival-specials`. Banner content will be editable in the admin when the banner screen is built.
 
 ---
 
-## 5. Mobile-First Interaction Layout
+## 5. Returning customers
 
-```
-+-------------------------------------------------------------------+
-|  [Header: Logo, Search Icon, Hamburger Menu]                     |
-+-------------------------------------------------------------------+
-|                                                                   |
-|   [ Full-Width Touch-Friendly Product Gallery Carousel ]          |
-|                                                                   |
-|   Signature Slow-Cooked Mutton Mandi Platter                     |
-|   ₹1,250 per box (Serves 2-3)                                    |
-|                                                                   |
-|   [ Batch: Weekend Only ] [ Lead Time: 12 Hours ]                |
-|                                                                   |
-|   ★ Ingredients: A2 Ghee, Aged Basmati, Prime Mutton...          |
-|   ★ Allergens: Contains Dairy (Ghee), Cashews                    |
-|                                                                   |
-+-------------------------------------------------------------------+
-|  [ FLOATING STICKY BOTTOM BAR — Always Visible ]                 |
-|  [ Qty: - 1 + ]    [ 💬  Order on WhatsApp — ₹1,250 ]           |
-+-------------------------------------------------------------------+
-```
-
-**Key Mobile Mechanics:**
-1. **Persistent Floating CTA Bar**: WhatsApp button stays locked to the viewport bottom — zero scrolling to order.
-2. **Thumb-Zone Placement**: Full-width button, minimum 48px touch target height.
-3. **Native App Switch**: `whatsapp://send` protocol opens WhatsApp directly without browser redirect.
+The request is stored in the browser, so a returning customer can continue where they left off. Category deep links (for example `/menu?category=biryani-mandi`) can be bookmarked.
 
 ---
 
-## 6. WhatsApp Message Templates
+## 6. Mobile ergonomics
 
-### 6.1 Standard Catalog Order
-
-```
-*NEW ORDER — YUMMY SPOT* 🍲
----------------------------------------
-*Dish:* Gulab Jamun in Saffron Syrup
-*Portion:* 2 (per box)
-*Estimated Price:* ₹700.00
-*Prep Lead Time:* 4 hours
-
-*Customer Details:*
-• Name: [Customer Name]
-• Delivery Area: [Neighborhood]
-
-*Special Request:* Please ensure light sugar syrup.
----------------------------------------
-Please confirm kitchen slot and share UPI QR. Thank you!
-```
-
-### 6.2 Custom Catering Inquiry
-
-```
-*CUSTOM CATERING INQUIRY — YUMMY SPOT* 🎉
----------------------------------------
-*Event:* Housewarming Lunch
-*Date:* 15th November 2026
-*Guests:* 35 Adults
-*Menu:* Weekend Mandi Platter + Ghee Sweets
-
-*Budget:* ₹15,000–₹20,000
-*Dietary:* 10 Pure Veg, 25 Non-Veg (Halal)
-
-*Contact:* [Name] — [Phone]
----------------------------------------
-Looking forward to discussing menu and pricing!
-```
+- A floating bottom bar shows the number of items and links to `/order`; it hides on `/order` and `/admin`.
+- Every control is at least 44 px; quantity steppers are 44 px circles.
+- The datetime picker, tel keyboard and email keyboard use native inputs.
+- The Turnstile widget is mobile-friendly and unobtrusive.
 
 ---
 
-## 7. Conversion Optimization: 5 Critical Friction Points
+## 7. Owner replies on WhatsApp (templates in the admin)
 
-| # | Friction Point | Root Hesitation | UX Solution |
-| :-: | :--- | :--- | :--- |
-| **1** | Delivery timing uncertainty | "Will it arrive in 30 min or tomorrow?" | Color-coded **Lead Time Badge** on every product card and PDP |
-| **2** | Hygiene & ingredient anxiety | "Is this made in a clean environment?" | **Ingredient Transparency Accordion** listing every raw component; "Pure A2 Ghee" trust badges |
-| **3** | Portion sizing confusion | "Will 1 box feed my family?" | Humanized yield: *"Serves 2–3 adults generously (≈950g)"* |
-| **4** | Re-typing order into WhatsApp | Customers abandon when blank chat opens | **100% Pre-Populated WhatsApp deep-links** with dish name, qty, price |
-| **5** | Out-of-stock disappointment | Gets excited, then told unavailable | CMS toggle transforms button to **"Notify Me for Next Batch"** |
+The "Message customer on WhatsApp" button builds a short message from the order status: confirmed, ready, out for delivery, rejected (with the reason you typed), cancelled, or a neutral greeting. Edit wording in `customerMessage()` in `components/admin/orders-admin.tsx`.
 
 ---
 
-## 8. Accessibility Flow & Keyboard Navigation
+## 8. Accessibility
 
-### WCAG 2.1 Level AA Keyboard Sequence
+Keyboard sequence for ordering:
 
 ```
-1. [Tab]    → Focus 'Skip to Main Content' anchor
-2. [Tab]    → Move through Primary Navigation (Home, Menu, About, Contact)
-3. [Tab]    → Enter Menu Grid → Focus ring highlights first category card
-4. [Enter]  → Navigate to Category Page
-5. [Tab]    → Select Product Card
-6. [Enter]  → Open Product Detail Page
-7. [Tab]    → Quantity increment button
-8. [Space]  → Increment quantity
-9. [Tab]    → Focus 'Order via WhatsApp' button
-10. [Enter] → Trigger WhatsApp redirect
-    aria-label: "Order 2 boxes of Mutton Mandi Platter via WhatsApp"
+1. [Tab]    Skip link, then primary navigation
+2. [Tab]    Search, category chips, dietary filters
+3. [Tab]    Dish cards ("Dish details", then "Add to request")
+4. [Enter]  Add to request; quantity stepper appears (aria-live announces the number)
+5. [Tab]    "N items in your request" link
+6. [Enter]  Open /order; fields have labels, errors use role="alert"
+7. [Tab]    Submit ("Send order request" stays disabled until Turnstile passes)
 ```
 
-### Accessibility Specifications
-- **Focus Rings**: `focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2`
-- **Contrast Ratios**: All text meets minimum 4.5:1 WCAG AA contrast ratio
-- **Screen Readers**: Quantity counter uses `aria-live="polite"` for audio feedback on changes
-- **Skip Link**: `<a href="#main-content">` always the first focusable element
-
----
-
-*This specification establishes customer journey principles, conversational handoffs, and conversion heuristics for all Yummy Spot interfaces.*
+- Focus rings are visible in light and dark themes.
+- Errors are announced with `role="alert"`; success uses `role="status"`.
+- Text meets WCAG AA contrast using the design tokens.

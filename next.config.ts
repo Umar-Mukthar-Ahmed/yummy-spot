@@ -9,9 +9,7 @@ const nextConfig: NextConfig = {
   /* ── React ──────────────────────────────────────────── */
   reactStrictMode: true,
 
-  /* ── Next.js 16 Experimental Features ─────────────── */
-  cacheComponents: true,
-  partialPrefetching: true,
+  /* cacheComponents / partialPrefetching are off: they hang in the Cloudflare Workers runtime (see OpenNext spike). */
 
   /* ── Image Optimization ────────────────────────────── */
   images: {

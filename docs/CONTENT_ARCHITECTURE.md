@@ -5,6 +5,8 @@
 > **Document Version**: 1.0.0  
 > **Status**: Production Architecture  
 > **Scope**: Complete Information Architecture, Taxonomy, Search, Navigation, and Content Management Schema  
+>
+> **Note**: This is the original design blueprint. Ordering is now an in-app **order request** (see `docs/USER_FLOW.md`) with WhatsApp kept as a fallback contact, and content is managed in the custom admin (see `docs/CMS_PLAN.md`). Where this blueprint says "order via WhatsApp", read "add to request / send order request". Implemented routes are listed in `docs/SITE_MAP.md`.
 
 ---
 
@@ -13,7 +15,7 @@
 **Yummy Spot** is a digital storefront for a premium home-based artisanal culinary kitchen. Unlike commercial restaurants or cloud kitchens operating under high-turnover fast-food models, Yummy Spot operates on small-batch, crafted-to-order culinary principles:
 - **Zero Industrial Additives**: Pure ingredients, authentic ghee, stone-ground spices, and generational recipes.
 - **Made-to-Order Freshness**: Items are cooked per order batch with designated preparation lead times (ranging from 4 hours to 48 hours for festival or custom orders).
-- **Conversational Commerce**: Product discovery, catalog browsing, dietary vetting, and customization occur on the web application; final transaction handoff, order confirmation, payment links, and delivery coordination execute smoothly via **WhatsApp**.
+- **Request-based Commerce**: Product discovery, catalog browsing, dietary vetting, and customization occur on the web application; the customer sends an order request, and the owner confirms availability, timing, payment and delivery with them directly (phone or **WhatsApp**, started from the admin).
 
 The content architecture must reflect trust, craftsmanship, hygiene, transparency (ingredients, allergens, shelf life), and clear ordering mechanics so customers understand how and when their food is made.
 
@@ -48,10 +50,10 @@ The website follows an intuitive, shallow discovery funnel designed to minimize 
 | Hierarchy Level | Route Pattern | Page Type | Primary Objective | Key Secondary Actions |
 | :--- | :--- | :--- | :--- | :--- |
 | **L0: Root** | `/` | Marketing Homepage | Brand storytelling, featured categories, seasonal specials, instant WhatsApp order CTA | Client-side search, testimonial reviews, kitchen hygiene credentials |
-| **L1: Catalog** | `/menu` | Single Menu experience | All configured categories, global product search and dietary filters, product details, and seasonal items | Scroll to a category, expand details, order via WhatsApp |
+| **L1: Catalog** | `/menu` | Single Menu experience | All configured categories, global product search and dietary filters, product details, and seasonal items | Scroll to a category, expand details, add to request |
 | **L1: Brand Story** | `/about` | Editorial Story | The culinary founder journey, hygiene standards, traditional ingredients, source farms | WhatsApp inquiry, read testimonials |
 | **L1: Visual Gallery** | `/gallery` | Media Wall | High-resolution kitchen prep, packaging, customer events, behind-the-scenes video snippets | Click-through to relevant product PDP |
-| **L1: Custom Concierge**| `/custom-order` | Guided Inquiry | Multi-step form for wedding boxes, party trays, corporate gifts, festival hampers | Direct compilation into formatted WhatsApp briefing |
+| **L1: Custom Concierge**| `/custom-order` | Guided Inquiry | Multi-step form for wedding boxes, party trays, corporate gifts, festival hampers (planned) | Submitted as an order request with notes |
 | **L1: Contact Hub** | `/contact` | Communications | WhatsApp primary link, operating kitchen hours, delivery zones, Google Maps service radius | FAQ accordion, direct phone link |
 | **L1: Regulatory** | `/privacy`, `/terms` | Legal Policy | Food safety compliance, cancellation policies, delivery liability, data privacy | Return to catalog |
 
@@ -428,4 +430,4 @@ To guarantee that customers never experience disappointment by ordering items th
 
 ---
 
-*This architecture document serves as the binding blueprint for data schema definitions, UI design, client-side state, and headless CMS integrations.*
+*This architecture document serves as the binding blueprint for data schema definitions, UI design, and client-side state. Backend and admin decisions are recorded in `docs/ARCHITECTURE.md` and `docs/CMS_PLAN.md`.*

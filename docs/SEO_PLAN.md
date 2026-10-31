@@ -174,7 +174,7 @@ export default async function Image() {
 | **LCP** | < 1.8s | `<Image priority>` on hero elements; preload critical AVIF; zero render-blocking JS |
 | **CLS** | < 0.05 | Explicit `width`/`height` on all images; reserve layout height for banners |
 | **INP** | < 150ms | No heavyweight JS on first click; 150ms debounce on search; instant routing |
-| **TTFB** | < 150ms | Vercel Edge Cache + ISR cached static HTML |
+| **TTFB** | < 150ms | Cloudflare static assets (prerendered pages served from the edge) |
 
 ### Image Optimization Rules
 1. Negotiate `AVIF` then `WebP` automatically via `next/image`

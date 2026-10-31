@@ -1,5 +1,7 @@
 /** Catalog domain types aligned with the Phase 1 product model. */
 
+import type { MediaAsset } from "./media"
+
 export type PriceUnit = "per piece" | "per kg" | "per box" | "per dozen" | "per portion" | "per pack"
 export type ProductLabel = "bestseller" | "featured" | "isNew" | "seasonal" | "festive" | "customOrder"
 export type DietaryClassification =
@@ -13,14 +15,9 @@ export type DietaryClassification =
   | "postnatal-safe"
   | "immunity-booster"
 
-export interface ProductImage {
+export interface ProductImage extends MediaAsset {
   id: string
-  url: string
-  alt: string
-  width: number
-  height: number
   blurDataUrl?: string
-  isPrimary?: boolean
 }
 
 export interface ProductTag {
@@ -81,7 +78,6 @@ export interface Product {
   allergens: string[]
   servingSize: string
   shelfLife: string
-  whatsappMessageTemplate: string
   seo: EntitySEO
   createdAt: string
   updatedAt: string

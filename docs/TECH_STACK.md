@@ -11,7 +11,7 @@ Complete reference for every technology in the stack with version pins, rational
 
 | Package | Version | Role | Notes |
 | :--- | :--- | :--- | :--- |
-| `next` | 15.x | Full-stack React framework | App Router, ISR, Server Components, next/image, next/font |
+| `next` | 16.x | Full-stack React framework | App Router, Server Components, next/image, next/font. `cacheComponents` and `partialPrefetching` stay off (they hang on Cloudflare Workers) |
 | `react` | 19.x | UI library | Server Components, concurrent features |
 | `react-dom` | 19.x | React DOM renderer | Required peer of react |
 | `typescript` | 5.x | Type system | Strict mode — see `tsconfig.json` |
@@ -82,7 +82,7 @@ import { ThemeProvider } from "next-themes"
 
 | Package | Version | Role | Notes |
 | :--- | :--- | :--- | :--- |
-| `zod` | 3.x | Runtime schema validation | Validates env vars at startup; will validate CMS responses in Phase 6 |
+| `zod` | 4.x | Runtime schema validation | Validates env vars and the order request (shared by the form and `/api/orders`) |
 
 ### Usage Pattern
 ```typescript
@@ -95,16 +95,17 @@ const envSchema = z.object({
 
 ---
 
-## Future Integrations (Phase 6+)
+## Backend services and deployment (all free tier)
 
-| Package | Phase | Role | Notes |
-| :--- | :---: | :--- | :--- |
-| `payload` | 6 | Headless CMS | Embeds at `/admin` inside Next.js App Router; PostgreSQL or MongoDB backend |
-| `@payloadcms/richtext-lexical` | 6 | Rich text editor | For product descriptions and about page content |
-| `cloudinary` / `@cloudinary/next` | 6 | Media CDN | Auto-optimize food photography to AVIF/WebP |
-| `@supabase/supabase-js` | 6 | PostgreSQL client | For Payload CMS database or direct querying |
-| `react-hook-form` | 5 | Form state | Custom order form, multi-step catering inquiry |
-| `@hookform/resolvers` | 5 | RHF + Zod integration | Zod schema validation in form fields |
+| Package / service | Role | Notes |
+| :--- | :---: | :--- |
+| `@supabase/supabase-js` | Database, Auth, Realtime client | Browser (anon key, RLS) and server (service role, `/api/orders` only) |
+| `@opennextjs/cloudflare` (dev) | Builds the Next.js app for Cloudflare Workers | Config in `open-next.config.ts` (static assets cache, no extra bindings) |
+| `wrangler` (dev) | Cloudflare CLI | Local preview and deploy; config in `wrangler.jsonc` |
+| Cloudflare Turnstile | Spam protection | Loaded from Cloudflare's script; verified server-side with a `fetch`, no package |
+| Cloudinary | Image upload and delivery | No SDK: signed upload via `fetch`, URLs built in `lib/media.ts` |
+
+Not used: Payload or any CMS package, `@supabase/ssr`, Cloudinary SDKs, R2, D1, Durable Objects, Hyperdrive, `react-hook-form` (the forms are small enough to use native controls).
 
 ---
 
@@ -120,11 +121,13 @@ const envSchema = z.object({
 ### npm Scripts
 ```json
 {
-  "dev":    "next dev --turbo",
-  "build":  "next build",
-  "start":  "next start",
-  "lint":   "next lint",
-  "format": "prettier --write ."
+  "dev":        "next dev",
+  "build":      "next build",
+  "start":      "next start",
+  "lint":       "eslint",
+  "cf:build":   "opennextjs-cloudflare build",
+  "cf:preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+  "cf:deploy":  "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
 }
 ```
 

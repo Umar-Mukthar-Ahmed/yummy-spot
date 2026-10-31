@@ -17,7 +17,7 @@ export default function robots(): MetadataRoute.Robots {
         allow: "/",
         disallow: [
           "/api/",      /* API routes — not for indexing */
-          "/admin/",    /* Future: CMS admin dashboard */
+          "/admin/",    /* Owner admin (also noindex) */
           "/_next/",    /* Next.js internals */
           "/private/",  /* Future: authenticated content */
         ],

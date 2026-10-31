@@ -4,6 +4,7 @@ import { Fraunces, Manrope } from "next/font/google"
 import { Providers } from "@/providers"
 import { Navbar } from "@/components/layout/navbar"
 import { Footer } from "@/components/layout/footer"
+import { SiteChrome } from "@/components/layout/site-chrome"
 import { siteConfig } from "@/config/site"
 import "./globals.css"
 
@@ -111,17 +112,9 @@ export default function RootLayout({
 
           {/* Phase 3: enable when a configured announcement is ready. */}
           {/* <AnnouncementBanner message="" /> */}
-          <Navbar />
-
-          <main
-            id="main-content"
-            tabIndex={-1}
-            className="min-h-[calc(100dvh-4rem)] outline-none"
-          >
+          <SiteChrome header={<Navbar />} footer={<Footer />}>
             {children}
-          </main>
-
-          <Footer />
+          </SiteChrome>
         </Providers>
       </body>
     </html>

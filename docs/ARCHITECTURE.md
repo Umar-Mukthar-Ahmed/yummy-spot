@@ -11,12 +11,12 @@ with rationale so future engineers understand the *why* behind each choice.
 
 ## 1. Framework: Next.js App Router
 
-**Decision**: Next.js 15 App Router with React 19 Server Components.
+**Decision**: Next.js 16 App Router with React 19, deployed to Cloudflare Workers through OpenNext.
 
 **Rationale**:
-- **ISR (Incremental Static Regeneration)** allows pages to be served as static HTML from the CDN edge, then revalidated on demand when the CMS publishes. This is the only approach that achieves sub-100ms TTFB for a food ordering site without building a custom caching layer.
-- **Server Components** eliminate the hydration cost of product description and ingredient lists — the most content-heavy parts of the page — shipping zero JavaScript for purely display content.
-- **`generateStaticParams()`** pre-renders all known product and category pages at build time, giving instant page loads for the most trafficked product URLs.
+- **Static-first pages.** Every storefront page is prerendered at build time and served as static content. Catalog data is fetched in the browser from Supabase, so there is no server cache or revalidation layer to run, and menu changes are visible on the next page load.
+- **Server Components by default** keep display-only content free of client JavaScript; only interactive leaves (search, cart, order form, admin) are Client Components.
+- **`cacheComponents` and `partialPrefetching` are deliberately off.** They hang the Cloudflare Workers runtime (verified in a local workerd test), and the site does not need them.
 - **App Router file conventions** (`loading.tsx`, `error.tsx`, `not-found.tsx`) provide progressive streaming and error recovery without custom wrapper components.
 
 ---
@@ -74,7 +74,7 @@ with rationale so future engineers understand the *why* behind each choice.
 **Rationale**:
 - `strict: true` alone is insufficient — `noUncheckedIndexedAccess` and `exactOptionalPropertyTypes` catch entire classes of bugs (array index out of bounds, missing optional property checks).
 - Zod validates environment variables at startup (`lib/env.ts`) so misconfigured deployments fail immediately with a clear error, not a cryptic runtime crash.
-- Zod schemas for the Product and Category data models (in `docs/PRODUCT_MODEL.md`) will serve as the source of truth for CMS data validation in Phase 6, ensuring type safety from CMS response through React component props.
+- Zod schemas validate environment variables and the order request (`lib/validation/order.ts`), which is shared by the order form and `/api/orders`. Database rows are mapped to typed `Product` objects in `lib/catalog.ts`.
 
 ---
 
@@ -89,15 +89,19 @@ with rationale so future engineers understand the *why* behind each choice.
 
 ---
 
-## 8. WhatsApp Commerce Architecture
+## 8. Ordering Architecture: Order Requests (WhatsApp as fallback)
 
-**Decision**: Deep-link based ordering via `https://wa.me/{phone}?text={encoded_message}`.
+**Decision**: Customers send a multi-item **order request** from the website. Requests are stored in Supabase and managed by the owner in `/admin`. There is no payment gateway and no checkout.
 
 **Rationale**:
-- Eliminates the complexity, liability, and maintenance cost of a payment gateway, checkout flow, and order management system.
-- The kitchen owner can start taking orders on day one without any backend setup.
-- Pre-populated message templates (`buildWhatsAppUrl()` in `lib/utils.ts`) reduce customer friction to a single tap.
-- This model scales naturally until order volume justifies a proper OMS — at which point, the WhatsApp CTA is replaced with a checkout flow without changing the product display pages.
+- Sending customers straight into the owner's WhatsApp lets anyone spam it, and gives the owner no inbox, filters, or status tracking.
+- A stored request can be validated, rate-limited, de-duplicated and priced by the database, and shown in one list.
+- The owner still confirms availability, timing and the final price by phone or WhatsApp, started from the order screen, so nothing about the personal, home-kitchen feel is lost.
+- Existing WhatsApp buttons stay as an optional contact route.
+
+**Flow**: `Add to request` (browser) -> `/order` (Turnstile) -> `POST /api/orders` -> database function `create_order` -> `/admin/orders`. Details: `docs/PRODUCT_MODEL.md` section 6 and `docs/USER_FLOW.md`.
+
+**Anti-spam layers**: Turnstile, hidden honeypot field, minimum fill time, request size limit, per-phone and per-IP-hash rate limits, 10-minute duplicate detection, an idempotency key, and an owner kill switch (`accepting_orders`).
 
 ---
 
@@ -105,12 +109,11 @@ with rationale so future engineers understand the *why* behind each choice.
 
 | Route Type | Strategy | Rationale |
 | :--- | :--- | :--- |
-| Homepage | ISR (revalidate: 3600) | Changes often for banners/specials, but not per-request |
-| Category pages | ISR (revalidate: 86400) + on-demand | Product availability changes; ISR + webhook covers both |
-| Product pages | ISR (revalidate: 86400) + on-demand | Same as category |
-| About, Contact | Pure SSG | Never changes without a code deploy |
-| Custom Order | SSG shell + client form | UI is static; form is interactive |
-| API routes | Dynamic | Webhook handlers must be real-time |
+| Homepage, `/menu`, `/order` | Static shell, client-side data | Catalog loaded from Supabase in the browser; always fresh, no cache to invalidate |
+| `/admin/*` | Static shell, client-rendered | All data goes browser to Supabase under RLS; no Worker CPU |
+| `/api/orders` | Dynamic (Worker) | Verifies Turnstile and calls `create_order` with the service role |
+| `/api/admin/media/sign` | Dynamic (Worker) | Signs Cloudinary uploads for admins; keeps the API secret server-side |
+| Metadata routes (sitemap, robots, manifest) | Static | No dynamic data |
 
 ---
 
@@ -121,6 +124,38 @@ with rationale so future engineers understand the *why* behind each choice.
 - **`components/ui/`** contains generic primitives with no business logic. They never import from `config/` or `lib/`.
 - **`components/layout/`** contains structural components. They import from `config/navigation.ts` but never from CMS or API layers.
 - **`types/`** contains TypeScript interfaces. Nothing in `types/` imports from components or config — it is the lowest layer of the dependency graph.
+
+---
+
+## 11. Final Free-First Architecture
+
+```
+                      +------------------------------------------+
+   Customer / Owner   |  Cloudflare Workers Free (OpenNext)      |
+   ---------------->  |  static pages + 2 API routes             |
+                      +------------------+-----------------------+
+                                         |
+        +--------------------------------+-----------------------------+
+        |                                |                             |
+        v                                v                             v
++---------------+              +-------------------+          +----------------+
+| Turnstile     |              | Supabase Free     |          | Cloudinary     |
+| (spam check)  |              | PostgreSQL + Auth |          | Free (images)  |
++---------------+              | + Realtime, RLS   |          +----------------+
+                               +-------------------+
+```
+
+| Decision | Choice | Why |
+| :--- | :--- | :--- |
+| Hosting | Cloudflare Workers Free | Free, global, supports Next.js through OpenNext |
+| Data | Supabase PostgreSQL | Free tier, SQL constraints and RLS enforce rules in one place |
+| Admin login | Supabase Auth | No custom auth to build or secure |
+| Images | Cloudinary Free | Upload, resize and optimized delivery without running anything |
+| CMS | Custom `/admin` | Smallest thing that does the job; no CMS product runs on the free Workers plan reliably |
+| Caching | None on the server | Catalog fetched in the browser; nothing to invalidate |
+| Extra Cloudflare products | None (no R2, D1, Durable Objects, Queues, Hyperdrive) | Not needed; each would add setup and cost risk |
+
+Free-tier limits, risks and the list of features deliberately not added live in [`FREE_TIER_NOTES.md`](../FREE_TIER_NOTES.md).
 
 ---
 
