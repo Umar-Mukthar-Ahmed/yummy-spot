@@ -1,13 +1,15 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react"
 import { categoryNav } from "@/config/navigation"
-import { formatPrice } from "@/lib/utils"
 import { matchesFuzzyQuery } from "@/lib/search"
+import { cn } from "@/lib/utils"
 import { useCatalog } from "@/hooks/use-catalog"
 import { MediaImage } from "@/components/shared/media-image"
+import { Price } from "@/components/shared/price"
 import { AddToRequest } from "@/components/order/add-to-request"
 import { WhatsAppButton } from "@/components/ui/whatsapp-button"
+import type { Product } from "@/types/product"
 
 const dietaryFilters = [
   { slug: "pure-vegetarian", label: "Pure vegetarian" },
@@ -18,6 +20,10 @@ const dietaryFilters = [
 
 const placeholderCards = Array.from({ length: 8 }, (_, index) => index)
 const configCategories = categoryNav.flatMap((item) => (item.segment ? [{ slug: item.segment, name: item.label }] : []))
+const productGrid = "grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4"
+const pill = "shrink-0 whitespace-nowrap rounded-full border font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+const pillOn = "border-primary bg-primary text-primary-foreground"
+const pillOff = "border-border bg-background text-foreground hover:bg-surface"
 
 /** Menu controls and responsive product grid, loading published dishes from Supabase in the browser. */
 export function ProductBrowser() {
@@ -87,73 +93,127 @@ export function ProductBrowser() {
   }
 
   const categoryName = (slug: string) => categories.find((item) => item.slug === slug)?.name
+  const filtered = selectedCategory !== null || selectedDietary.length > 0 || debouncedQuery !== ""
+
+  function clearFilters() {
+    setQuery("")
+    setSelectedDietary([])
+    selectCategory(null)
+  }
 
   return (
     <div>
-      <div className="sticky top-16 z-20 -mx-4 mb-5 space-y-3 border-y border-border/70 bg-background/95 px-4 py-3 backdrop-blur sm:top-20 sm:mx-0 sm:rounded-2xl sm:border sm:px-4">
-      <label className="relative block min-w-0">
-        <span className="sr-only">Search menu products</span>
-        <svg aria-hidden="true" viewBox="0 0 24 24" className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="11" cy="11" r="7" /><path d="m16 16 4 4" /></svg>
-        <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search dishes and treats…" autoComplete="off" className="min-h-12 w-full rounded-xl border border-border bg-surface pl-12 pr-4 font-sans text-base text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring" />
-      </label>
-      <nav aria-label="Menu categories" className="-mx-1 overflow-x-auto px-1 pb-1">
-        <ul className="flex w-max gap-2 sm:w-auto sm:flex-wrap" role="list">
-          <li><button type="button" id="category-all" aria-pressed={selectedCategory === null} onClick={() => selectCategory(null)} className={`min-h-11 rounded-full border px-4 font-sans text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${selectedCategory === null ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background text-foreground hover:bg-surface"}`}>All</button></li>
-          {categories.map((category) => <li key={category.slug}><button type="button" id={`category-${category.slug}`} aria-pressed={selectedCategory === category.slug} onClick={() => selectCategory(category.slug)} className={`min-h-11 whitespace-nowrap rounded-full border px-4 font-sans text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${selectedCategory === category.slug ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background text-foreground hover:bg-surface"}`}>{category.name}</button></li>)}
-        </ul>
-      </nav>
-      <fieldset className="flex min-w-0 items-center gap-2 overflow-x-auto pb-1"><legend className="sr-only">Dietary filters</legend><span aria-hidden="true" className="shrink-0 font-sans text-xs font-semibold text-muted-foreground">Dietary</span>{dietaryFilters.map((filter) => { const active = selectedDietary.includes(filter.slug); return <button key={filter.slug} type="button" aria-pressed={active} onClick={() => toggleDietary(filter.slug)} className={`min-h-11 shrink-0 rounded-full border px-3 font-sans text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${active ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background text-foreground hover:bg-surface"}`}>{filter.label}</button> })}</fieldset>
+      {/* Only search and categories stay pinned; the dietary row scrolls away to keep the viewport for food. */}
+      <div className="sticky top-16 z-20 -mx-4 space-y-3 border-b border-border/70 bg-background/95 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-b-2xl sm:border-x sm:px-4">
+        <label className="relative block min-w-0">
+          <span className="sr-only">Search menu products</span>
+          <svg aria-hidden="true" viewBox="0 0 24 24" className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="11" cy="11" r="7" /><path d="m16 16 4 4" /></svg>
+          <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search dishes and treats…" autoComplete="off" className="min-h-12 w-full rounded-xl border border-border bg-surface pl-12 pr-4 font-sans text-base text-foreground outline-none transition-shadow focus-visible:ring-2 focus-visible:ring-ring" />
+        </label>
+        <nav aria-label="Menu categories" className="-mx-4 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden">
+          <ul className="flex w-max gap-2" role="list">
+            <li><button type="button" id="category-all" aria-pressed={selectedCategory === null} onClick={() => selectCategory(null)} className={cn(pill, "min-h-11 px-4 text-sm", selectedCategory === null ? pillOn : pillOff)}>All</button></li>
+            {categories.map((category) => <li key={category.slug}><button type="button" id={`category-${category.slug}`} aria-pressed={selectedCategory === category.slug} onClick={() => selectCategory(category.slug)} className={cn(pill, "min-h-11 px-4 text-sm", selectedCategory === category.slug ? pillOn : pillOff)}>{category.name}</button></li>)}
+          </ul>
+        </nav>
       </div>
-      <p className="mb-5 mt-6 font-sans text-sm text-muted-foreground" aria-live="polite">{products.length ? `${visibleProducts.length} dishes` : "Browse the menu"}{selectedCategory ? ` · ${categoryName(selectedCategory) ?? "Category"}` : ""}</p>
+
+      <fieldset className="-mx-4 mt-3 flex min-w-0 items-center gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden">
+        <legend className="sr-only">Dietary filters</legend>
+        <span aria-hidden="true" className="shrink-0 font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground">Dietary</span>
+        {dietaryFilters.map((filter) => (
+          <button key={filter.slug} type="button" aria-pressed={selectedDietary.includes(filter.slug)} onClick={() => toggleDietary(filter.slug)} className={cn(pill, "min-h-11 px-3.5 text-xs", selectedDietary.includes(filter.slug) ? pillOn : pillOff)}>{filter.label}</button>
+        ))}
+      </fieldset>
+
+      <div className="mb-4 mt-4 flex items-center justify-between gap-3">
+        <p className="font-sans text-sm text-muted-foreground" aria-live="polite">
+          {state.status === "ready" ? `${visibleProducts.length} ${visibleProducts.length === 1 ? "dish" : "dishes"}` : "Browse the menu"}
+          {selectedCategory ? ` · ${categoryName(selectedCategory) ?? "Category"}` : ""}
+        </p>
+        {filtered && <button type="button" onClick={clearFilters} className="min-h-11 font-sans text-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Clear filters</button>}
+      </div>
 
       {visibleProducts.length > 0 ? (
-        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" role="list">
-          {visibleProducts.map((product) => {
-            const image = product.images.find((item) => item.isPrimary) ?? product.images[0]
-            return <li id={`product-${product.slug}`} key={product.id} className={`scroll-mt-28 overflow-hidden rounded-xl border bg-surface-elevated shadow-sm transition duration-300 ${highlightedProduct === product.slug ? "border-primary ring-2 ring-primary/40 shadow-lg" : "border-border"}`}>
-              <div className="relative aspect-[4/3] overflow-hidden bg-surface">
-                <MediaImage image={image} alt={product.name} sizes="(min-width: 1280px) 22vw, (min-width: 1024px) 30vw, (min-width: 640px) 45vw, 100vw" className="object-cover" />
-              </div>
-              <div className="p-4">
-                <h2 className="font-serif text-xl text-foreground">{product.name}</h2>
-                <p className="mt-1 font-sans text-xs font-semibold uppercase tracking-wide text-primary">{categoryName(product.categorySlug) ?? "Menu item"}</p>
-                <p className="mt-2 line-clamp-2 min-h-10 font-sans text-sm text-muted-foreground">{product.shortDescription}</p>
-                <div className="mt-3 flex flex-wrap gap-1.5">{product.tags.map((tag) => <span key={tag.id} className="rounded-full border border-border px-2.5 py-1 font-sans text-xs text-muted-foreground">{tag.name}</span>)}</div>
-                <p className="mt-3 font-sans text-sm font-semibold text-foreground">{product.price > 0 ? <>{formatPrice(product.salePrice ?? product.price, product.currency)} <span className="font-normal text-muted-foreground">/ {product.priceUnit}</span></> : "Ask for today's price"}</p>
-                <p className={`mt-2 font-sans text-xs ${product.inStock ? "text-success" : "text-muted-foreground"}`}>{product.availabilityNote ?? (product.inStock ? "Available to order" : "Not available right now")}</p>
-                <details className="mt-3 border-t border-border pt-3"><summary className="min-h-11 cursor-pointer py-2 font-sans text-sm font-semibold text-foreground">Dish details</summary><p className="text-sm text-muted-foreground">{product.description}</p>{product.ingredients.length > 0 && <p className="mt-2 text-xs text-muted-foreground">Ingredients: {product.ingredients.join(", ")}</p>}</details>
-                <AddToRequest product={product} />
-              </div>
-            </li>
-          })}
+        <ul className={productGrid} role="list">
+          {visibleProducts.map((product, index) => (
+            <ProductCard key={product.id} product={product} categoryLabel={categoryName(product.categorySlug)} highlighted={highlightedProduct === product.slug} index={index} />
+          ))}
         </ul>
       ) : state.status === "ready" ? (
-        <p className="rounded-xl border border-dashed border-border bg-surface/40 px-5 py-8 text-center font-sans text-sm text-muted-foreground" role="status">
-          {products.length > 0 ? "No published items match these filters yet." : "No dishes are published yet. Please check back soon."}
-        </p>
+        <div className="rounded-2xl border border-dashed border-border bg-surface/40 px-5 py-10 text-center" role="status">
+          <p className="font-sans text-sm text-muted-foreground">{products.length > 0 ? "No dishes match these filters." : "No dishes are published yet. Please check back soon."}</p>
+          {products.length > 0 && filtered && <button type="button" onClick={clearFilters} className="mt-3 min-h-11 font-sans text-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Clear filters</button>}
+        </div>
       ) : state.status === "unavailable" ? (
-        <div className="rounded-xl border border-dashed border-border bg-surface/40 px-5 py-8 text-center" role="status">
-          <p className="font-sans text-sm text-muted-foreground">The menu is not available right now. Please try again in a few minutes, or message us on WhatsApp.</p>
-          <WhatsAppButton className="mt-4" />
+        <div className="rounded-2xl border border-dashed border-border bg-surface/40 px-5 py-10 text-center" role="status">
+          <p className="mx-auto max-w-md font-sans text-sm text-muted-foreground">The menu is not available right now. Please try again in a few minutes, or message us on WhatsApp.</p>
+          <WhatsAppButton tone="outline" className="mt-4" />
         </div>
       ) : (
         <>
           <p className="sr-only" role="status">Loading the menu.</p>
-          <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" role="list" aria-label="Menu item placeholders">
-            {placeholderCards.map((card) => <li key={card} aria-hidden="true" className="overflow-hidden rounded-xl border border-border bg-surface-elevated shadow-sm">
-              <div className="aspect-[4/3] skeleton" />
-              <div className="space-y-3 p-4">
-                <div className="h-5 w-3/4 skeleton rounded" />
-                <div className="h-3 w-full skeleton rounded" />
-                <div className="h-3 w-2/3 skeleton rounded" />
-                <div className="flex items-center gap-2 pt-1"><div className="h-3 w-12 skeleton rounded" /><div className="h-3 w-20 skeleton rounded" /></div>
-                <div className="h-11 w-full skeleton rounded-xl" />
-              </div>
-            </li>)}
+          <ul className={productGrid} role="list" aria-hidden="true">
+            {placeholderCards.map((card) => (
+              <li key={card} className="overflow-hidden rounded-2xl border border-border bg-surface-elevated">
+                <div className="flex sm:block">
+                  <div className="aspect-square w-28 shrink-0 skeleton sm:aspect-[4/3] sm:w-full" />
+                  <div className="flex-1 space-y-2.5 p-3 sm:p-4">
+                    <div className="h-5 w-3/4 skeleton rounded" />
+                    <div className="h-3 w-full skeleton rounded" />
+                    <div className="h-3 w-1/3 skeleton rounded" />
+                  </div>
+                </div>
+                <div className="px-3 pb-3 sm:px-4 sm:pb-4"><div className="h-11 w-full skeleton rounded-xl" /></div>
+              </li>
+            ))}
           </ul>
         </>
       )}
-
     </div>
+  )
+}
+
+/** One dish. Compact row on phones (photo left), vertical card from the sm breakpoint up; the action is always at the bottom. */
+function ProductCard({ product, categoryLabel, highlighted, index }: { product: Product; categoryLabel: string | undefined; highlighted: boolean; index: number }) {
+  const image = product.images.find((item) => item.isPrimary) ?? product.images[0]
+  const note = !product.inStock ? "Not available right now" : product.availabilityNote
+  return (
+    <li
+      id={`product-${product.slug}`}
+      style={{ "--i": Math.min(index, 8) } as CSSProperties}
+      className={cn("enter flex scroll-mt-40 flex-col overflow-hidden rounded-2xl border bg-surface-elevated shadow-xs transition duration-300 hover:shadow-md", highlighted ? "border-primary ring-2 ring-primary/40 shadow-lg" : "border-border")}
+    >
+      <div className="flex sm:flex-col">
+        <div className="relative aspect-square w-28 shrink-0 overflow-hidden bg-surface sm:aspect-[4/3] sm:w-full">
+          <MediaImage image={image} alt={product.name} sizes="(min-width: 1280px) 22vw, (min-width: 1024px) 30vw, (min-width: 640px) 45vw, 112px" className="object-cover" />
+        </div>
+        <div className="min-w-0 flex-1 p-3 sm:p-4 sm:pb-2">
+          <h2 className="font-serif text-lg leading-snug text-foreground sm:text-xl">{product.name}</h2>
+          {categoryLabel && <p className="mt-0.5 font-sans text-xs font-semibold uppercase tracking-wide text-primary">{categoryLabel}</p>}
+          {product.shortDescription && <p className="mt-1.5 line-clamp-2 font-sans text-sm text-muted-foreground">{product.shortDescription}</p>}
+          <Price price={product.price} salePrice={product.salePrice} currency={product.currency} unit={product.priceUnit} className="mt-2 block font-sans text-sm" />
+          {note && <p className={cn("mt-1 font-sans text-xs", product.inStock ? "text-muted-foreground" : "font-medium text-destructive")}>{note}</p>}
+        </div>
+      </div>
+      <div className="mt-auto px-3 pb-3 sm:px-4 sm:pb-4">
+        {product.tags.length > 0 && (
+          <ul className="flex flex-wrap gap-1.5" role="list" aria-label="Dietary information">
+            {product.tags.map((tag) => <li key={tag.id} className="rounded-full border border-border px-2.5 py-0.5 font-sans text-xs text-muted-foreground">{tag.name}</li>)}
+          </ul>
+        )}
+        {(product.description || product.ingredients.length > 0) && (
+          <details className="group mt-2 border-t border-border">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between py-2 font-sans text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
+              Dish details
+              <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 transition-transform duration-200 group-open:rotate-180" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+            </summary>
+            {product.description && <p className="font-sans text-sm text-muted-foreground">{product.description}</p>}
+            {product.ingredients.length > 0 && <p className="mt-2 font-sans text-xs text-muted-foreground">Ingredients: {product.ingredients.join(", ")}</p>}
+          </details>
+        )}
+        <AddToRequest product={product} />
+      </div>
+    </li>
   )
 }

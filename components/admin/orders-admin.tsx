@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { buildWhatsAppUrl, formatPrice } from "@/lib/utils"
 import { useAdmin } from "./admin-shell"
-import { adminInput, adminLabel, formatDateTime, Message, PrimaryButton, SecondaryButton } from "./ui"
+import { adminInput, adminLabel, DangerButton, formatDateTime, Message, PrimaryButton, SecondaryButton } from "./ui"
 
 type Status = "new" | "confirmed" | "preparing" | "ready" | "out_for_delivery" | "completed" | "rejected" | "cancelled"
 
@@ -39,6 +39,21 @@ const statusLabel: Record<Status, string> = {
   completed: "Completed",
   rejected: "Rejected",
   cancelled: "Cancelled",
+}
+
+const statusTone: Record<Status, string> = {
+  new: "border-primary/40 bg-primary/10 text-primary",
+  confirmed: "border-border bg-surface text-foreground",
+  preparing: "border-border bg-surface text-foreground",
+  ready: "border-success/40 bg-success/10 text-success",
+  out_for_delivery: "border-success/40 bg-success/10 text-success",
+  completed: "border-success/40 bg-success/10 text-success",
+  rejected: "border-destructive/40 bg-destructive/10 text-destructive",
+  cancelled: "border-destructive/40 bg-destructive/10 text-destructive",
+}
+
+function StatusBadge({ status }: { status: Status }) {
+  return <span className={`shrink-0 rounded-full border px-2.5 py-0.5 font-sans text-xs font-semibold ${statusTone[status]}`}>{statusLabel[status]}</span>
 }
 
 const tabs = [
@@ -168,12 +183,12 @@ export function OrdersAdmin() {
           {!loading && visible.length === 0 && <li className="rounded-xl border border-dashed border-border p-6 text-center font-sans text-sm text-muted-foreground">No orders here.</li>}
           {visible.map((order) => (
             <li key={order.id}>
-              <button type="button" onClick={() => setSelectedId(order.id)} aria-pressed={selectedId === order.id} className={`w-full rounded-xl border p-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${selectedId === order.id ? "border-primary bg-surface" : "border-border bg-surface-elevated hover:bg-surface"}`}>
+              <button type="button" onClick={() => setSelectedId(order.id)} aria-pressed={selectedId === order.id} className={`w-full rounded-xl border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${selectedId === order.id ? "border-primary bg-primary/5 shadow-sm" : "border-border bg-surface-elevated hover:bg-surface"}`}>
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-sans text-sm font-semibold text-foreground">{order.reference}</span>
-                  <span className="rounded-full border border-border px-2.5 py-0.5 font-sans text-xs text-muted-foreground">{statusLabel[order.status]}</span>
+                  <StatusBadge status={order.status} />
                 </div>
-                <p className="mt-1 font-sans text-sm text-foreground">{order.customer_name} · {order.order_items.length} {order.order_items.length === 1 ? "item" : "items"}</p>
+                <p className="mt-1 flex items-baseline justify-between gap-2 font-sans text-sm text-foreground"><span className="min-w-0 truncate">{order.customer_name} · {order.order_items.length} {order.order_items.length === 1 ? "item" : "items"}</span><span className="shrink-0 font-semibold">{order.subtotal === 0 && order.needs_price_quote ? "To quote" : `${formatPrice(order.subtotal, order.currency)}${order.needs_price_quote ? "+" : ""}`}</span></p>
                 <p className="font-sans text-xs text-muted-foreground">Wanted {formatDateTime(order.requested_for)} · {order.fulfilment_type}</p>
               </button>
             </li>
@@ -227,7 +242,7 @@ function OrderDetail({ order, onChanged, onBack }: { order: Order; onChanged: ()
           <h2 className="font-serif text-xl text-foreground">{order.reference}</h2>
           <p className="font-sans text-xs text-muted-foreground">Received {formatDateTime(order.created_at)}</p>
         </div>
-        <span className="rounded-full border border-border px-3 py-1 font-sans text-xs font-medium text-foreground">{statusLabel[order.status]}</span>
+        <StatusBadge status={order.status} />
       </header>
 
       <dl className="grid gap-x-4 gap-y-2 font-sans text-sm sm:grid-cols-2">
@@ -260,7 +275,7 @@ function OrderDetail({ order, onChanged, onBack }: { order: Order; onChanged: ()
           {nextStatuses(order).map((status) => (
             status === "confirmed" || status === "preparing" || status === "ready" || status === "out_for_delivery" || status === "completed"
               ? <PrimaryButton key={status} disabled={busy} onClick={() => changeStatus(status)}>{actionLabel[status]}</PrimaryButton>
-              : <SecondaryButton key={status} disabled={busy} onClick={() => changeStatus(status)}>{actionLabel[status]}</SecondaryButton>
+              : <DangerButton key={status} disabled={busy} onClick={() => changeStatus(status)}>{actionLabel[status]}</DangerButton>
           ))}
         </div>
       )}
@@ -270,7 +285,7 @@ function OrderDetail({ order, onChanged, onBack }: { order: Order; onChanged: ()
           <label htmlFor="reject-reason" className={adminLabel}>Reason for rejecting (shared with the customer if you message them)</label>
           <textarea id="reject-reason" rows={2} maxLength={300} value={reason} onChange={(event) => setReason(event.target.value)} className={adminInput} />
           <div className="flex gap-2">
-            <PrimaryButton disabled={busy || reason.trim().length === 0} onClick={() => void update({ status: "rejected", rejection_reason: reason.trim() }, "Order rejected.")}>Confirm rejection</PrimaryButton>
+            <DangerButton disabled={busy || reason.trim().length === 0} onClick={() => void update({ status: "rejected", rejection_reason: reason.trim() }, "Order rejected.")}>Confirm rejection</DangerButton>
             <SecondaryButton onClick={() => setRejecting(false)}>Keep order</SecondaryButton>
           </div>
         </div>

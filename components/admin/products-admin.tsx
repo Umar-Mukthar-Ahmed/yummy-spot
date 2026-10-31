@@ -9,6 +9,7 @@ import type { DietaryClassification } from "@/types/product"
 import { useAdmin } from "./admin-shell"
 import { ImageUploader } from "./image-uploader"
 import { adminInput, Checkbox, Field, Message, PrimaryButton, SecondaryButton } from "./ui"
+import { MediaImage } from "@/components/shared/media-image"
 
 type ProductRow = {
   id: string
@@ -143,9 +144,15 @@ export function ProductsAdmin() {
         <ul className="mt-5 space-y-2" role="list">
           {loading && <li className="font-sans text-sm text-muted-foreground">Loading…</li>}
           {!loading && products.length === 0 && <li className="rounded-xl border border-dashed border-border p-6 text-center font-sans text-sm text-muted-foreground">No products yet. Add your first dish.</li>}
-          {products.map((product) => (
+          {products.map((product) => {
+            const covers = Array.isArray(product.images) ? product.images.flatMap((item: unknown) => parseMediaAsset(item) ?? []) : []
+            const cover = covers.find((item) => item.isPrimary) ?? covers[0]
+            return (
             <li key={product.id} className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-surface-elevated p-3">
-              <div className="min-w-0 flex-1">
+              <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-surface">
+                <MediaImage image={cover} alt="" sizes="48px" className="object-cover" />
+              </div>
+              <div className="min-w-0 flex-1 basis-40">
                 <p className="truncate font-sans text-sm font-semibold text-foreground">{product.name}</p>
                 <p className="font-sans text-xs text-muted-foreground">{categoryName(product.category_id)} · {product.price > 0 ? `${formatPrice(product.sale_price ?? product.price, product.currency.trim())} ${product.price_unit}` : "Price on request"}</p>
               </div>
@@ -153,7 +160,8 @@ export function ProductsAdmin() {
               <Checkbox id={`pub-${product.id}`} label="Published" checked={product.is_published} onChange={(value) => void quickUpdate(product.id, { is_published: value, published_at: value ? (product.published_at ?? new Date().toISOString()) : product.published_at })} />
               <SecondaryButton onClick={() => { setMessage(null); setForm(toForm(product)) }}>Edit</SecondaryButton>
             </li>
-          ))}
+            )
+          })}
         </ul>
       )}
     </div>

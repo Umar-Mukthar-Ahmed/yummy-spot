@@ -99,20 +99,22 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     <AdminContext.Provider value={value}>
       <div className="min-h-dvh bg-background text-foreground">
         <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur">
-          <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 gap-y-1 px-4 py-2">
+          <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 px-4 py-2">
             <span className="font-serif text-lg">Kitchen admin</span>
-            <nav aria-label="Admin" className="flex flex-1 flex-wrap gap-1">
+            <nav aria-label="Admin" className="order-3 -mx-1 flex w-full gap-1 overflow-x-auto px-1 pb-1 [scrollbar-width:none] md:order-none md:mx-0 md:w-auto md:flex-1 md:overflow-visible md:px-0 md:pb-0 [&::-webkit-scrollbar]:hidden">
               {navItems.map((item) => {
                 const active = pathname.startsWith(item.href)
                 return (
-                  <Link key={item.href} href={item.href} aria-current={active ? "page" : undefined} className={`inline-flex min-h-11 items-center rounded-full px-4 font-sans text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-surface hover:text-foreground"}`}>
+                  <Link key={item.href} href={item.href} aria-current={active ? "page" : undefined} className={`inline-flex min-h-11 shrink-0 items-center rounded-full px-4 font-sans text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-surface hover:text-foreground"}`}>
                     {item.label}
                   </Link>
                 )
               })}
             </nav>
-            <Link href="/" className="inline-flex min-h-11 items-center font-sans text-sm text-muted-foreground hover:text-foreground">View site</Link>
-            <button type="button" onClick={() => void supabase?.auth.signOut()} className="min-h-11 font-sans text-sm text-muted-foreground underline hover:text-foreground" aria-label={`Sign out ${email}`}>Sign out</button>
+            <div className="ml-auto flex items-center gap-3 md:ml-0">
+              <Link href="/" className="inline-flex min-h-11 items-center font-sans text-sm text-muted-foreground hover:text-foreground">View site</Link>
+              <button type="button" onClick={() => void supabase?.auth.signOut()} className="min-h-11 font-sans text-sm text-muted-foreground underline hover:text-foreground" aria-label={`Sign out ${email}`}>Sign out</button>
+            </div>
           </div>
         </header>
         <main id="main-content" tabIndex={-1} className="mx-auto max-w-6xl px-4 py-6 outline-none">{children}</main>
