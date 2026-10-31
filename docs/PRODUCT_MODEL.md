@@ -27,7 +27,7 @@ Seeded with the 10 categories from `config/navigation.ts` (`supabase/seed.sql`).
 | Group | Columns |
 | :--- | :--- |
 | Identity | `id`, `category_id` (restrict delete), `name` (3-120), `slug` (unique), `short_description` (max 200), `description` |
-| Classification | `labels[]` (`bestseller`, `featured`, `isNew`, `seasonal`, `festive`, `customOrder`), `dietary[]` (`halal`, `pure-vegetarian`, `contains-egg`, `gluten-free`, `dairy-free`, `sugar-free`, `diabetic-friendly`, `postnatal-safe`, `immunity-booster`), `tags[]` (free text) |
+| Classification | `labels[]` (`bestseller`, `featured`, `isNew`, `seasonal`, `festive`, `customOrder`), `dietary[]` (`pure-vegetarian`, `contains-egg`, `gluten-free`, `dairy-free`, `sugar-free`, `diabetic-friendly`, `postnatal-safe`, `immunity-booster`), `tags[]` (free text) |
 | Pricing | `price`, `sale_price` (must be lower than `price`), `price_unit`, `currency` (default `INR`) |
 | Availability | `in_stock`, `availability_note`, `delivery_areas[]`, `preparation_time_minutes`, `order_lead_time_hours` |
 | Food facts | `ingredients[]`, `allergens[]`, `serving_size`, `shelf_life` |

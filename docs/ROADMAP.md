@@ -91,7 +91,7 @@ See [`RESPONSIVE_DESIGN.md`](./RESPONSIVE_DESIGN.md) for detailed implementation
   - Fluid typography via `clamp()` for all heading sizes
   - Mobile slide-out navigation drawer (Motion animated, focus-trapped, touch gesture support)
   - WhatsApp CTA Button variant (high-contrast emerald green, `min-h-[44px]`)
-  - Dietary badge set: Halal, Pure Veg, Sugar-Free, No Preservatives
+  - Dietary badge set: Pure Veg, Sugar-Free, No Preservatives
   - Skeleton/loading placeholder components
   - Rich footer with social icons and culinary hygiene notices
   - `<Breadcrumb />` component for category/product pages

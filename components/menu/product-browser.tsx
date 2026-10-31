@@ -10,7 +10,6 @@ import { AddToRequest } from "@/components/order/add-to-request"
 import { WhatsAppButton } from "@/components/ui/whatsapp-button"
 
 const dietaryFilters = [
-  { slug: "halal", label: "Halal" },
   { slug: "pure-vegetarian", label: "Pure vegetarian" },
   { slug: "gluten-free", label: "Gluten-free" },
   { slug: "dairy-free", label: "Dairy-free" },
@@ -142,13 +141,13 @@ export function ProductBrowser() {
           <p className="sr-only" role="status">Loading the menu.</p>
           <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" role="list" aria-label="Menu item placeholders">
             {placeholderCards.map((card) => <li key={card} aria-hidden="true" className="overflow-hidden rounded-xl border border-border bg-surface-elevated shadow-sm">
-              <div className="aspect-[4/3] animate-pulse bg-muted" />
+              <div className="aspect-[4/3] skeleton" />
               <div className="space-y-3 p-4">
-                <div className="h-5 w-3/4 animate-pulse rounded bg-muted" />
-                <div className="h-3 w-full animate-pulse rounded bg-muted" />
-                <div className="h-3 w-2/3 animate-pulse rounded bg-muted" />
-                <div className="flex items-center gap-2 pt-1"><div className="h-3 w-12 animate-pulse rounded bg-muted" /><div className="h-3 w-20 animate-pulse rounded bg-muted" /></div>
-                <div className="h-11 w-full animate-pulse rounded-xl bg-muted" />
+                <div className="h-5 w-3/4 skeleton rounded" />
+                <div className="h-3 w-full skeleton rounded" />
+                <div className="h-3 w-2/3 skeleton rounded" />
+                <div className="flex items-center gap-2 pt-1"><div className="h-3 w-12 skeleton rounded" /><div className="h-3 w-20 skeleton rounded" /></div>
+                <div className="h-11 w-full skeleton rounded-xl" />
               </div>
             </li>)}
           </ul>

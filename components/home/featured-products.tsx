@@ -66,11 +66,11 @@ function FeaturedProductCard({ product }: { product: Product }) {
 function ProductCardPlaceholder() {
   return (
     <div className="h-full overflow-hidden rounded-2xl border border-border bg-surface-elevated shadow-sm">
-      <div className="aspect-[1.3/1] animate-pulse bg-muted" />
+      <div className="aspect-[1.3/1] skeleton" />
       <div className="space-y-2 p-3">
-        <div className="h-4 w-4/5 animate-pulse rounded bg-muted" />
-        <div className="h-3 w-full animate-pulse rounded bg-muted" />
-        <div className="h-3 w-2/3 animate-pulse rounded bg-muted" />
+        <div className="h-4 w-4/5 skeleton rounded" />
+        <div className="h-3 w-full skeleton rounded" />
+        <div className="h-3 w-2/3 skeleton rounded" />
         <div className="h-9 rounded-full bg-muted" />
       </div>
     </div>

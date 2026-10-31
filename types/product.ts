@@ -5,7 +5,6 @@ import type { MediaAsset } from "./media"
 export type PriceUnit = "per piece" | "per kg" | "per box" | "per dozen" | "per portion" | "per pack"
 export type ProductLabel = "bestseller" | "featured" | "isNew" | "seasonal" | "festive" | "customOrder"
 export type DietaryClassification =
-  | "halal"
   | "pure-vegetarian"
   | "contains-egg"
   | "gluten-free"

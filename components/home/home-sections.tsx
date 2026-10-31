@@ -181,9 +181,9 @@ function TestimonialsSection() {
         <p className="sr-only" role="status">Review card placeholders are shown until customer reviews are approved.</p>
         <ul className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-2 sm:px-0 lg:grid-cols-3" role="list" aria-label="Customer review placeholders">
           {placeholderTiles.slice(0, 3).map((tile) => <li key={tile} aria-hidden="true" className="w-[82vw] max-w-sm shrink-0 snap-start rounded-2xl border border-border bg-background p-5 shadow-sm sm:w-auto sm:max-w-none">
-            <div className="mb-4 h-4 w-24 animate-pulse rounded bg-muted" />
-            <div className="space-y-2"><div className="h-3 w-full animate-pulse rounded bg-muted" /><div className="h-3 w-5/6 animate-pulse rounded bg-muted" /><div className="h-3 w-2/3 animate-pulse rounded bg-muted" /></div>
-            <div className="mt-5 flex items-center gap-3"><div className="h-10 w-10 animate-pulse rounded-full bg-muted" /><div className="space-y-2"><div className="h-3 w-24 animate-pulse rounded bg-muted" /><div className="h-3 w-16 animate-pulse rounded bg-muted" /></div></div>
+            <div className="mb-4 h-4 w-24 skeleton rounded" />
+            <div className="space-y-2"><div className="h-3 w-full skeleton rounded" /><div className="h-3 w-5/6 skeleton rounded" /><div className="h-3 w-2/3 skeleton rounded" /></div>
+            <div className="mt-5 flex items-center gap-3"><div className="h-10 w-10 skeleton rounded-full" /><div className="space-y-2"><div className="h-3 w-24 skeleton rounded" /><div className="h-3 w-16 skeleton rounded" /></div></div>
           </li>)}
         </ul>
       </Container>

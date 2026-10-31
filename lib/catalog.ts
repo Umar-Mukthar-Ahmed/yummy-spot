@@ -14,7 +14,6 @@ import type {
 export const priceUnits: readonly PriceUnit[] = ["per piece", "per kg", "per box", "per dozen", "per portion", "per pack"]
 export const productLabels: readonly ProductLabel[] = ["bestseller", "featured", "isNew", "seasonal", "festive", "customOrder"]
 export const dietaryLabels: Record<DietaryClassification, string> = {
-  halal: "Halal",
   "pure-vegetarian": "Pure vegetarian",
   "contains-egg": "Contains egg",
   "gluten-free": "Gluten-free",

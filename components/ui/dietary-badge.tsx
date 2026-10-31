@@ -1,7 +1,6 @@
 import { Badge } from "@/components/ui/badge"
 
 export type DietaryType =
-  | "halal"
   | "pure-veg"
   | "sugar-free"
   | "no-preservatives"
@@ -9,7 +8,6 @@ export type DietaryType =
   | "gluten-free"
 
 const dietaryOptions: Record<DietaryType, { label: string; variant: "success" | "primary" | "accent" | "outline" }> = {
-  halal: { label: "Halal", variant: "success" },
   "pure-veg": { label: "Pure Veg", variant: "success" },
   "sugar-free": { label: "Sugar-Free", variant: "primary" },
   "no-preservatives": { label: "No Preservatives", variant: "accent" },
