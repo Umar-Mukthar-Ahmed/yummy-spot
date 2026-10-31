@@ -45,7 +45,7 @@ export function Logo({ className, asDiv = false }: LogoProps) {
     <Link
       href="/"
       aria-label={`${siteConfig.name} — Go to homepage`}
-      className="rounded-sm transition-opacity duration-150 hover:opacity-75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+      className="inline-flex min-h-11 items-center rounded-sm transition-opacity duration-150 hover:opacity-75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
     >
       {logoText(className)}
     </Link>

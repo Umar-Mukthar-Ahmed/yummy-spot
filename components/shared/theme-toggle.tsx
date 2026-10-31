@@ -23,7 +23,7 @@ export function ThemeToggle({ className }: { className?: string }) {
     return (
       <div
         className={cn(
-          "h-9 w-9 rounded-lg bg-surface animate-pulse-soft",
+          "h-11 w-11 rounded-lg bg-surface animate-pulse-soft",
           className
         )}
         aria-hidden="true"
@@ -39,7 +39,7 @@ export function ThemeToggle({ className }: { className?: string }) {
       type="button"
       onClick={() => setTheme(isDark ? "light" : "dark")}
       className={cn(
-        "inline-flex h-9 w-9 items-center justify-center rounded-lg",
+        "inline-flex h-11 w-11 items-center justify-center rounded-lg",
         "text-muted-foreground hover:text-foreground hover:bg-surface",
         "transition-all duration-150",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",

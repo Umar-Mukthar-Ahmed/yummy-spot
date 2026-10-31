@@ -143,7 +143,7 @@
   --accent:            hsl(43 80% 57%);    /* warm gold */
   --accent-foreground: hsl(25 18% 11%);
 
-  --destructive:       hsl(0 72% 51%);
+  --destructive:       hsl(0 72% 44%);
   --destructive-foreground: hsl(0 0% 100%);
 
   --success:           hsl(142 72% 29%);
@@ -172,12 +172,12 @@
   --primary-hover:     hsl(22 62% 65%);
 
   --muted:             hsl(25 10% 18%);
-  --muted-foreground:  hsl(30 10% 54%);
+  --muted-foreground:  hsl(30 10% 62%);
 
   --accent:            hsl(43 72% 52%);
   --accent-foreground: hsl(25 14% 7%);
 
-  --destructive:       hsl(0 62% 58%);
+  --destructive:       hsl(0 70% 66%);
   --destructive-foreground: hsl(0 0% 100%);
 
   --success:           hsl(142 60% 45%);
